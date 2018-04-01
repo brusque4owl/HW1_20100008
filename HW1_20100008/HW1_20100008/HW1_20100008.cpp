@@ -338,13 +338,21 @@ void draw_sword() {
 #define FOX_FIXED_HEAD_BOTTOM 3
 #define FOX_FIXED_BODY_LEFT 4
 #define FOX_FIXED_BODY_RIGHT 5
-
+/* 원본
 GLfloat fox_fixed_head_ear_left[3][2] = { {-4.0,11.0},{-2.0,9.0},{-3.0,8.0} };
 GLfloat fox_fixed_head_ear_right[3][2] = { {4.0,11.0},{2.0,9.0},{3.0,8.0} };
 GLfloat fox_fixed_head_top[4][2] = { { -4.0,6.0 },{-2.0,9.0},{2.0,9.0},{4.0,6.0} };
 GLfloat fox_fixed_head_bottom[3][2] = { {-4.0,6.0},{0.0,2.0},{4.0,6.0} };
 GLfloat fox_fixed_body_left[4][2] = { {-3.0,-2.0},{-3.0,5.0},{0.0,2.0},{0.0,-2.0} };
 GLfloat fox_fixed_body_right[4][2] = { {3.0,-2.0 },{3.0,5.0},{0.0,2.0},{0.0,-2.0} };
+*/
+// 아래는 수정본
+GLfloat fox_fixed_head_ear_left[3][2] = { { -16.0,44.0 },{ -8.0,36.0 },{ -12.0,32.0 } };
+GLfloat fox_fixed_head_ear_right[3][2] = { { 16.0,44.0 },{ 8.0,36.0 },{ 12.0,32.0 } };
+GLfloat fox_fixed_head_top[4][2] = { { -16.0,24.0 },{ -8.0,36.0 },{ 8.0,36.0 },{ 16.0,24.0 } };
+GLfloat fox_fixed_head_bottom[3][2] = { { -16.0,24.0 },{ 0.0,8.0 },{ 16.0,24.0 } };
+GLfloat fox_fixed_body_left[4][2] = { { -12.0,-8.0 },{ -12.0,20.0 },{ 0.0,8.0 },{ 0.0,-8.0 } };
+GLfloat fox_fixed_body_right[4][2] = { { 12.0,-8.0 },{ 12.0,20.0 },{ 0.0,8.0 },{ 0.0,-8.0 } };
 
 
 GLfloat fox_fixed_color[6][3] = {
@@ -413,18 +421,19 @@ void draw_fox_fixed() {
 	
 	glBindVertexArray(0);
 }
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //			FOX_ARM_1								                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #define FOX_ARM_1_LEFT 0
 #define FOX_ARM_1_RIGHT 1
-
+/* 원본 
 GLfloat fox_arm_1_left[4][2] = { {3.0,5.0},{3.0,3.0},{7.0,1.0},{7.0,3.0} };
 GLfloat fox_arm_1_right[4][2] = { {-3.0,5.0},{-3.0,3.0},{-7.0,1.0},{-7.0,3.0} };
+*/
+//아래는 수정본
+GLfloat fox_arm_1_left[4][2] = { { 12.0,20.0 },{ 12.0,12.0 },{ 28.0,4.0 },{ 28.0,12.0 } };
+GLfloat fox_arm_1_right[4][2] = { { -12.0,20.0 },{ -12.0,12.0 },{ -28.0,4.0 },{ -28.0,12.0 } };
 
 GLfloat fox_arm_1_color[2][3] = {
 	{ 184 / 255.0f, 12 / 255.0f, 0 / 255.0f },	// left arm top
@@ -467,9 +476,6 @@ void draw_fox_arm_1() {
 
 	glBindVertexArray(0);
 }
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //			FOX_ARM_2							                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -478,11 +484,17 @@ void draw_fox_arm_1() {
 #define FOX_ARM_2_BOTTOM_LEFT 1
 #define FOX_ARM_2_TOP_RIGHT 2
 #define FOX_ARM_2_BOTTOM_RIGHT 3
-
+/* 원본
 GLfloat fox_arm_2_top_left[4][2] = { { -3.0,3.0 },{ -3.0,5.0 },{ -6.0,3.0 },{ -6.0,1.0 } };
 GLfloat fox_arm_2_bottom_left[4][2] = { { -4.0,-1.0 },{ -4.0,1.0 },{ -6.0,3.0 },{ -6.0,1.0 } };
 GLfloat fox_arm_2_top_right[4][2] = { { 3.0,3.0 },{ 3.0,5.0 },{ 6.0,3.0 },{ 6.0,1.0 } };
 GLfloat fox_arm_2_bottom_right[4][2] = { { 4.0,-1.0 },{ 4.0,1.0 },{ 6.0,3.0 },{ 6.0,1.0 } };
+*/
+//아래는 수정본
+GLfloat fox_arm_2_top_left[4][2] = { { -12.0,12.0 },{ -12.0,20.0 },{ -24.0,12.0 },{ -24.0,4.0 } };
+GLfloat fox_arm_2_bottom_left[4][2] = { { -16.0,-4.0 },{ -16.0,4.0 },{ -24.0,12.0 },{ -24.0,4.0 } };
+GLfloat fox_arm_2_top_right[4][2] = { { 12.0,12.0 },{ 12.0,20.0 },{ 24.0,12.0 },{ 24.0,4.0 } };
+GLfloat fox_arm_2_bottom_right[4][2] = { { 16.0,-4.0 },{ 16.0,4.0 },{ 24.0,12.0 },{ 24.0,4.0 } };
 
 GLfloat fox_arm_2_color[4][3] = {
 	{ 184 / 255.0f, 12 / 255.0f, 0 / 255.0f },	// left arm top_left
@@ -535,12 +547,7 @@ void draw_fox_arm_2() {
 
 	glBindVertexArray(0);
 }
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //			FOX_LEG_SHOES							                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -549,11 +556,17 @@ void draw_fox_arm_2() {
 #define FOX_LEG_RIGHT 1
 #define FOX_SHOES_LEFT 2
 #define FOX_SHOES_RIGHT 3
-
+/* 원본
 GLfloat fox_leg_left[4][2] = { { -5.0,-6.0 },{ -2.0,-6.0 },{ 0.0,-2.0 },{ -3.0,-2.0 } };
 GLfloat fox_leg_right[4][2] = { { 5.0,-6.0 },{ 2.0,-6.0 },{ 0.0,-2.0 },{ 3.0,-2.0 } };
 GLfloat fox_shoes_left[4][2] = { {-2.0,-6.0},{-2.0,-8.0},{-6.0,-8.0},{-6.0,-6.0} };
 GLfloat fox_shoes_right[4][2] = { {2.0,-6.0},{2.0,-8.0},{6.0,-8.0},{6.0,-6.0} };
+*/
+//아래는 수정본
+GLfloat fox_leg_left[4][2] = { { -20.0,-24.0 },{ -8.0,-24.0 },{ 0.0,-8.0 },{ -12.0,-8.0 } };
+GLfloat fox_leg_right[4][2] = { { 20.0,-24.0 },{ 8.0,-24.0 },{ 0.0,-8.0 },{ 12.0,-8.0 } };
+GLfloat fox_shoes_left[4][2] = { { -8.0,-24.0 },{ -8.0,-32.0 },{ -24.0,-32.0 },{ -24.0,-24.0 } };
+GLfloat fox_shoes_right[4][2] = { { 8.0,-24.0 },{ 8.0,-32.0 },{ 24.0,-32.0 },{ 24.0,-24.0 } };
 
 GLfloat fox_leg_shoes_color[4][3] = {
 	{ 110 / 255.0f, 57 / 255.0f, 73 / 255.0f },	// leg_left
@@ -605,6 +618,115 @@ void draw_fox_leg_shoes() {
 
 	glBindVertexArray(0);
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//			FOX_FACES_BASIC							                       //
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#define FOX_BIG_EYES_LEFT 0
+#define FOX_BIG_EYES_RIGHT 1
+#define FOX_SMALL_EYES_LEFT 2
+#define FOX_SAMLL_EYES_RIGHT 3
+#define FOX_NOSE 4
+#define FOX_MOUTH_LINE_1 5
+#define FOX_MOUTH_LINE_2 6
+#define FOX_MOUTH_LINE_3 7
+#define FOX_MOUTH_LINE_4 8
+
+GLfloat fox_big_eyes_left[4][2] = { { -2.0,26.0 },{ -2.0,32.0 },{ -8.0,32.0 },{ -8.0,26.0 } };
+GLfloat fox_big_eyes_right[4][2] = { { 2.0,26.0 },{ 2.0,32.0 },{ 8.0,32.0 },{ 8.0,26.0 } };
+GLfloat fox_small_eyes_left[4][2] = { { -2.0,26.0 },{ -2.0,30.0 },{ -6.0,30.0 },{ -6.0,26.0 } };
+GLfloat fox_small_eyes_right[4][2] = { { 2.0,26.0 },{ 2.0,30.0 },{ 6.0,30.0 },{ 6.0,26.0 } };
+GLfloat fox_nose[6][2] = { {-2.0,16.0},{-4.0,18.0},{-2.0,20.0},{2.0,20.0},{4.0,18.0},{2.0,16.0} };
+GLfloat fox_mouth_line_1[2][2] = { {0.0,16.0},{0.0,12.0} };		// vertical
+GLfloat fox_mouth_line_2[2][2] = { {-2.0,12.0},{2.0,12.0} };	// horizontal
+GLfloat fox_mouth_line_3[2][2] = { {-2.0,12.0},{-4.0,14.0} };	// left
+GLfloat fox_mouth_line_4[2][2] = { {2.0,12.0},{4.0,14.0} };		// right
+
+GLfloat fox_faces_basic_color[9][3] = {
+	{ 70 / 255.0f, 90 / 255.0f, 53 / 255.0f },	// big_eyes_left
+	{ 70 / 255.0f, 90 / 255.0f, 53 / 255.0f },	// big_eyes_right
+	{ 0 / 255.0f, 0 / 255.0f, 0 / 255.0f },		// small_eyes_left
+	{ 0 / 255.0f, 0 / 255.0f, 0 / 255.0f },		// small_eyes_right
+	{ 39 / 255.0f, 13 / 255.0f, 12 / 255.0f },	// nose
+	{ 0 / 255.0f, 0 / 255.0f, 0 / 255.0f },		// mouth_line_1
+	{ 0 / 255.0f, 0 / 255.0f, 0 / 255.0f },		// mouth_line_2
+	{ 0 / 255.0f, 0 / 255.0f, 0 / 255.0f },		// mouth_line_3
+	{ 0 / 255.0f, 0 / 255.0f, 0 / 255.0f }		// mouth_line_4
+};
+
+GLuint VBO_fox_faces_basic, VAO_fox_faces_basic;
+void prepare_fox_faces_basic() {
+	GLsizeiptr buffer_size = sizeof(fox_big_eyes_left) + sizeof(fox_big_eyes_right) + sizeof(fox_small_eyes_left) + sizeof(fox_small_eyes_right)
+		+ sizeof(fox_nose) + sizeof(fox_mouth_line_1) + sizeof(fox_mouth_line_2) + sizeof(fox_mouth_line_3) + sizeof(fox_mouth_line_4);
+
+	// Initialize vertex buffer object.
+	glGenBuffers(1, &VBO_fox_faces_basic);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_fox_faces_basic);
+	glBufferData(GL_ARRAY_BUFFER, buffer_size, NULL, GL_STATIC_DRAW); // allocate buffer object memory
+
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(fox_big_eyes_left), fox_big_eyes_left);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(fox_big_eyes_left), sizeof(fox_big_eyes_right), fox_big_eyes_right);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(fox_big_eyes_left) + sizeof(fox_big_eyes_right), sizeof(fox_small_eyes_left), fox_small_eyes_left);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(fox_big_eyes_left) + sizeof(fox_big_eyes_right) + sizeof(fox_small_eyes_left), sizeof(fox_small_eyes_right),
+		fox_small_eyes_right);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(fox_big_eyes_left) + sizeof(fox_big_eyes_right) + sizeof(fox_small_eyes_left) + sizeof(fox_small_eyes_right),
+		sizeof(fox_nose), fox_nose);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(fox_big_eyes_left) + sizeof(fox_big_eyes_right) + sizeof(fox_small_eyes_left) + sizeof(fox_small_eyes_right) +
+		sizeof(fox_nose), sizeof(fox_mouth_line_1), fox_mouth_line_1);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(fox_big_eyes_left) + sizeof(fox_big_eyes_right) + sizeof(fox_small_eyes_left) + sizeof(fox_small_eyes_right) +
+		sizeof(fox_nose) + sizeof(fox_mouth_line_1), sizeof(fox_mouth_line_2), fox_mouth_line_2);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(fox_big_eyes_left) + sizeof(fox_big_eyes_right) + sizeof(fox_small_eyes_left) + sizeof(fox_small_eyes_right) +
+		sizeof(fox_nose) + sizeof(fox_mouth_line_1) + sizeof(fox_mouth_line_2), sizeof(fox_mouth_line_3), fox_mouth_line_3);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(fox_big_eyes_left) + sizeof(fox_big_eyes_right) + sizeof(fox_small_eyes_left) + sizeof(fox_small_eyes_right) +
+		sizeof(fox_nose) + sizeof(fox_mouth_line_1) + sizeof(fox_mouth_line_2) + sizeof(fox_mouth_line_3), sizeof(fox_mouth_line_4), fox_mouth_line_4);
+	// Initialize vertex array object.
+	glGenVertexArrays(1, &VAO_fox_faces_basic);
+	glBindVertexArray(VAO_fox_faces_basic);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_fox_faces_basic);
+	glVertexAttribPointer(LOC_VERTEX, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+}
+
+void draw_fox_faces_basic() {
+	glBindVertexArray(VAO_fox_faces_basic);
+
+	glUniform3fv(loc_primitive_color, 1, fox_faces_basic_color[FOX_BIG_EYES_LEFT]);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+
+	glUniform3fv(loc_primitive_color, 1, fox_faces_basic_color[FOX_BIG_EYES_RIGHT]);
+	glDrawArrays(GL_TRIANGLE_FAN, 4, 4);
+
+	glUniform3fv(loc_primitive_color, 1, fox_faces_basic_color[FOX_SMALL_EYES_LEFT]);
+	glDrawArrays(GL_TRIANGLE_FAN, 8, 4);
+
+	glUniform3fv(loc_primitive_color, 1, fox_faces_basic_color[FOX_SAMLL_EYES_RIGHT]);
+	glDrawArrays(GL_TRIANGLE_FAN, 12, 4);
+
+	glUniform3fv(loc_primitive_color, 1, fox_faces_basic_color[FOX_NOSE]);
+	glDrawArrays(GL_TRIANGLE_FAN, 16, 6);
+
+	glUniform3fv(loc_primitive_color, 1, fox_faces_basic_color[FOX_MOUTH_LINE_1]);
+	glDrawArrays(GL_LINES, 22, 2);
+
+	glUniform3fv(loc_primitive_color, 1, fox_faces_basic_color[FOX_MOUTH_LINE_2]);
+	glDrawArrays(GL_LINES, 24, 2);
+
+	glUniform3fv(loc_primitive_color, 1, fox_faces_basic_color[FOX_MOUTH_LINE_3]);
+	glDrawArrays(GL_LINES, 26, 2);
+
+	glUniform3fv(loc_primitive_color, 1, fox_faces_basic_color[FOX_MOUTH_LINE_4]);
+	glDrawArrays(GL_LINES, 28, 2);
+
+	glBindVertexArray(0);
+}
+
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -641,29 +763,34 @@ void display(void) {
 
 	//////////////////DRAW_FOX BELOW//////////////////////////
 	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(500.0f, 10.0f, 0.0f));
-	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(7.0f, 7.0f, 1.0f));
+	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 	draw_fox_fixed();
 
 	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(500.0f, 10.0f, 0.0f));
-	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(7.0f, 7.0f, 1.0f));
+	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 	//draw_fox_arm_1();
 
 	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(500.0f, 10.0f, 0.0f));
-	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(7.0f, 7.0f, 1.0f));
+	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 	draw_fox_arm_2();
 
 	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(500.0f, 10.0f, 0.0f));
-	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(7.0f, 7.0f, 1.0f));
+	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 	draw_fox_leg_shoes();
 
+	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(500.0f, 10.0f, 0.0f));
+	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
+	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
+	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
+	draw_fox_faces_basic();
 
 	glFlush();
 }
@@ -736,6 +863,7 @@ void prepare_scene(void) {
 	prepare_fox_arm_1();
 	prepare_fox_arm_2();
 	prepare_fox_leg_shoes();
+	prepare_fox_faces_basic();
 }
 
 void initialize_renderer(void) {
