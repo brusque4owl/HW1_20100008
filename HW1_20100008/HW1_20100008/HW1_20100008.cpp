@@ -23,6 +23,7 @@ glm::mat4 ViewMatrix, ProjectionMatrix, ViewProjectionMatrix;
 ///////////////////////////////////////////////////////////////////////////////////////
 GLfloat fox_centerx = 0.0f, fox_centery = 0.0f;
 bool fox_crash = 0;	// 0 for not crash, 1 for crashed; it is used in display()
+unsigned int set_key = 0;	// 0 for left, 1 for right, 2 for down, 3 for up
 
 ///////////////////////////////////////////////////////////////////////////////////////
 ///////////////////       functions for objects			///////////////////////////////
@@ -1038,38 +1039,51 @@ void cleanup(void) {
 }
 
 void timer(int value) {
-	//static unsigned int fox_crash_counter = 0;
-	// check_fox_crash(call function) - in this function, if crashed, fox_crash = 1;
+#define SENSITIVITY 5.0
+#define PERIOD 20
+	static unsigned int total_time = 0;	// 프로그램 시작 후부터 timer 실행시마다 1씩 카운트 됨.
+	if(total_time%PERIOD==0|| total_time % PERIOD == 1 || total_time % PERIOD == 2 || total_time % PERIOD == 3){
+			rotate_angle = rotate_angle + 90.0f*TO_RADIAN;
+	}
+	total_time++;
 	check_fox_crash(&fox_crash);
-	//if(fox_crash){
-		
-		//fox_crash_counter++;
-		//if(fox_crash_counter>4)
-			//fox_crash=0;
-	//}
+	switch(set_key){
+	case 0:	// left
+		fox_centerx -= SENSITIVITY;
+		break;
+	case 1:	// right
+		fox_centerx += SENSITIVITY;
+		break;
+	case 2:	// down
+		fox_centery -= SENSITIVITY;
+		break;
+	case 3:	// up
+		fox_centery += SENSITIVITY;
+		break;
+	}
 	glutPostRedisplay();
-	glutTimerFunc(1000, timer, value);
+	glutTimerFunc(100, timer, value);
 }
 
 void special(int key, int x, int y) {
-#define SENSITIVITY 5.0
+//#define SENSITIVITY 5.0
 	switch (key) {
 	case GLUT_KEY_LEFT:
-		fox_centerx -= SENSITIVITY;
-		rotate_angle += 90.0f*TO_RADIAN;
+		set_key = 0;
+		//rotate_angle += 90.0f*TO_RADIAN;
 		glutPostRedisplay();
 		break;
 	case GLUT_KEY_RIGHT:
-		fox_centerx += SENSITIVITY;
-		rotate_angle -= 90.0f*TO_RADIAN;
+		set_key = 1;
+		//rotate_angle -= 90.0f*TO_RADIAN;
 		glutPostRedisplay();
 		break;
 	case GLUT_KEY_DOWN:
-		fox_centery -= SENSITIVITY;
+		set_key = 2;
 		glutPostRedisplay();
 		break;
 	case GLUT_KEY_UP:
-		fox_centery += SENSITIVITY;
+		set_key = 3;
 		glutPostRedisplay();
 		break;
 	}
