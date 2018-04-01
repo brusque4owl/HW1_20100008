@@ -543,8 +543,8 @@ void draw_fox_fixed() {
 
 #define FOX_ARM_1_LEFT 0
 #define FOX_ARM_1_RIGHT 1
-GLfloat fox_arm_1_left[4][2] = { { 12.0,20.0 },{ 12.0,12.0 },{ 28.0,4.0 },{ 28.0,12.0 } };
-GLfloat fox_arm_1_right[4][2] = { { -12.0,20.0 },{ -12.0,12.0 },{ -28.0,4.0 },{ -28.0,12.0 } };
+GLfloat fox_arm_1_left[4][2] = { { -12.0,20.0 },{ -12.0,12.0 },{ -28.0,4.0 },{ -28.0,12.0 } };
+GLfloat fox_arm_1_right[4][2] = { { 12.0,20.0 },{ 12.0,12.0 },{ 28.0,4.0 },{ 28.0,12.0 } }; 
 
 GLfloat fox_arm_1_color[2][3] = {
 	{ 184 / 255.0f, 12 / 255.0f, 0 / 255.0f },	// left arm top
@@ -1061,6 +1061,15 @@ void timer(int value) {
 		fox_centery += SENSITIVITY;
 		break;
 	}
+	if(fox_centerx<-win_width/2.0f+2 * 28.0f)	// left (여우의 팔 가장 왼쪽이 -28.0f)
+		set_key=1;
+	else if(fox_centerx>win_width/2.0f-2*28.0f) // right (여우의 팔 가장 오른쪽이 +28.0f)
+		set_key=0;
+	else if(fox_centery<-win_height/2.0f+2*32.0f) // down  (여우의 신발 가장 아래가 -32.0f)
+		set_key=3;
+	else if(fox_centery>win_height/2.0f-2*56.0f) // up (여우의 모자 leaf 가장 위가 +56.0f)
+		set_key=2;
+
 	glutPostRedisplay();
 	glutTimerFunc(100, timer, value);
 }
