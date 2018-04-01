@@ -978,8 +978,6 @@ void display(void) {
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 	draw_car();
 
-
-
 	//////////////////DRAW_FOX BELOW//////////////////////////
 	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(fox_place, 10.0f, 0.0f));
 	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
@@ -1024,10 +1022,13 @@ void display(void) {
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 	draw_hat();
 
-
 	glFlush();
 }
 
+void timer(int value){
+	glutPostRedisplay();
+	glutTimerFunc(30, timer, value);
+}
 void keyboard(unsigned char key, int x, int y) {
 	switch (key) {
 	case 27: // ESC key
@@ -1063,6 +1064,7 @@ void register_callbacks(void) {
 	glutKeyboardFunc(keyboard);
 	glutReshapeFunc(reshape);
 	glutCloseFunc(cleanup);
+	glutTimerFunc(30, timer, 30);
 }
 
 void prepare_shader_program(void) {
