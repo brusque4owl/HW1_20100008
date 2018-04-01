@@ -21,20 +21,161 @@ glm::mat4 ViewMatrix, ProjectionMatrix, ViewProjectionMatrix;
 ///////////////////////////////////////////////////////////////////////////////////////
 /////////////////////     variables for objects          //////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
+#define TOUCH_LEFT 0
+#define TOUCH_RIGHT 1
+#define TOUCH_DOWN 2
+#define TOUCH_UP 3
+#define TOUCH_NOTHING 4
+
+//number of objects 0:airplane / 1:house / 2:car / 3:sword
+#define AIRPLANE 0
+#define HOUSE 1
+#define CAR 2
+#define SWORD 3
+
+// 물체의 초기 좌표
 GLfloat fox_centerx = 0.0f, fox_centery = 0.0f;
+GLfloat airplane_centerx = -500.0f, airplane_centery = 0.0f;
+GLfloat house_centerx = -100.0f, house_centery = 0.0f;
+GLfloat car_centerx = 100.0f, car_centery = 0.0f;
+GLfloat sword_centerx = 0.0f, sword_centery = 0.0f;
 bool fox_crash = 0;	// 0 for not crash, 1 for crashed; it is used in display()
 unsigned int set_key = 0;	// 0 for left, 1 for right, 2 for down, 3 for up
 
+// 물체의 deltax, deltay 값
+GLfloat airplane_deltax = -10.0, airplane_deltay = -10.0;
+GLfloat house_deltax = -10.0, house_deltay = 10.0;
+GLfloat car_deltax = 6.0, car_deltay = -4.0;
+GLfloat sword_deltax = 1.0, sword_deltay = 1.0;
+int win_width = 0, win_height = 0;
+float centerx = 0.0f, centery = 0.0f, rotate_angle = 0.0f;
 ///////////////////////////////////////////////////////////////////////////////////////
 ///////////////////       functions for objects			///////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
+//여우와 물체 간의 충돌 체크
 void check_fox_crash(bool *fox_crash){
 	if(*fox_crash==0)	*fox_crash = 1;
 	else				*fox_crash = 0;
 }
+
+//윈도우와 물체 간의 충돌 체크
+unsigned int check_direction(GLfloat object_centerx, GLfloat object_centery){  
+	if(object_centerx<-win_width/2.0f)	// touch left
+		return TOUCH_LEFT;
+	else if(object_centerx>win_width/2.0f) // touch right
+		return TOUCH_RIGHT;
+	else if(object_centery<-win_height/2.0f) // touch down
+		return TOUCH_DOWN;
+	else if(object_centery>win_height/2.0f) // touch up
+		return TOUCH_UP;
+	else								// not touch any place
+		return TOUCH_NOTHING;
+}
+
+GLfloat setting_deltax(unsigned int object){
+	if (object == 0)
+		return airplane_deltax;
+	else if (object == 1)
+		return house_deltax;
+	else if (object == 2)
+		return car_deltax;
+	else if (object == 3)
+		return sword_deltax;
+}
+GLfloat setting_deltay(unsigned int object) {
+	if (object == 0)
+		return airplane_deltay;
+	else if (object == 1)
+		return house_deltay;
+	else if (object == 2)
+		return car_deltay;
+	else if (object == 3)
+		return sword_deltay;
+}
+
+// 물체의 이동 방향 수정
+void modify_direction(GLfloat *deltax, GLfloat *deltay, unsigned int object){  // object 0:airplane / 1:house / 2:car / 3:sword
+	unsigned int touch_place;
+	switch(object){
+	case AIRPLANE:
+		touch_place = check_direction(airplane_centerx, airplane_centery);
+		break;
+	case HOUSE:
+		touch_place = check_direction(house_centerx, house_centery);
+		break;
+	case CAR:
+		touch_place = check_direction(car_centerx, car_centery);
+		break;
+	case SWORD:
+		touch_place = check_direction(sword_centerx, sword_centery);
+		break;
+	}
+	if(touch_place==TOUCH_NOTHING) return;
+
+	// 델타값 변화를 통한 방향 변화
+	if(*deltax>0.0f && *deltay>0.0f){
+		switch(touch_place){          // ↗
+		case TOUCH_RIGHT:
+			*deltax = -setting_deltax(object);
+			break;
+		case TOUCH_UP:
+			*deltay = -setting_deltay(object);
+			break;
+		}
+	}
+	else if (*deltax>0.0f && *deltay<0.0f) { //↘
+		switch (touch_place) {
+		case TOUCH_RIGHT:
+			*deltax = -setting_deltax(object);
+			break;
+		case TOUCH_DOWN:
+			*deltay = -setting_deltay(object);
+			break;
+		}
+	}
+	else if (*deltax<0.0f && *deltay>0.0f) { // ↖
+		switch (touch_place) {
+		case TOUCH_LEFT:
+			*deltax = -setting_deltax(object);
+			break;
+		case TOUCH_UP:
+			*deltay = -setting_deltay(object);
+			break;
+		}
+	}
+	else if(*deltax<0.0f && *deltay<0.0f) {  // ↙
+		switch (touch_place) {
+		case TOUCH_LEFT:
+			*deltax = -setting_deltax(object);
+			break;
+		case TOUCH_DOWN:
+			*deltay = -setting_deltay(object);
+			break;
+		}
+	}
+	else{}
+}
+
+// 다른 함수에 의해 정해진 변화량만큼 물체 이동
+void move_object(GLfloat deltax, GLfloat deltay, unsigned int object){
+	if(object==AIRPLANE){
+		airplane_centerx += deltax;
+		airplane_centery += deltay;
+	}
+	else if(object==HOUSE){
+		house_centerx += deltax;
+		house_centery += deltay;
+	}
+	else if(object==CAR){
+		car_centerx += deltax;
+		car_centery += deltay;
+	}
+	else if(object==SWORD){
+		sword_centerx += deltax;
+		sword_centery += deltay;
+	}
+}
 ///////////////////////////////////////////////////////////////////////////////////////
-int win_width = 0, win_height = 0;
-float centerx = 0.0f, centery = 0.0f, rotate_angle = 0.0f;
 
 GLfloat axes[4][2];
 GLfloat axes_color[3] = { 0.0f, 0.0f, 0.0f };
@@ -929,18 +1070,21 @@ void display(void) {
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 	draw_axes();
 
-	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-500.0f, 0.0f, 0.0f));
+	//ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-500.0f, 0.0f, 0.0f));
+	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(airplane_centerx, airplane_centery, 0.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 	draw_airplane();
 
-	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-100.0f, 0.0f, 0.0f));
+	//ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-100.0f, 0.0f, 0.0f));
+	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(house_centerx, house_centery, 0.0f));
 	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 	draw_house();
 
-	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(100.0f, 0.0f, 0.0f));
+	//ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(100.0f, 0.0f, 0.0f));
+	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(car_centerx, car_centery, 0.0f));
 	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
@@ -1010,6 +1154,7 @@ void display(void) {
 void keyboard(unsigned char key, int x, int y) {
 	switch (key) {
 
+
 	case 27: // ESC key
 		glutLeaveMainLoop(); // Incur destuction callback for cleanups.
 		break;
@@ -1046,8 +1191,24 @@ void timer(int value) {
 			rotate_angle = rotate_angle + 90.0f*TO_RADIAN;
 	}
 	total_time++;
+
+	// 물체 이동
+	move_object(airplane_deltax, airplane_deltay, AIRPLANE);
+	move_object(house_deltax, house_deltay, HOUSE);
+	move_object(car_deltax, car_deltay, CAR);
+	move_object(sword_deltax, sword_deltay, SWORD);
+
+	// 윈도우와 물체의 충돌 체크
+	modify_direction(&airplane_deltax, &airplane_deltay, AIRPLANE);
+	modify_direction(&house_deltax, &house_deltay, HOUSE);
+	modify_direction(&car_deltax, &car_deltay, CAR);
+	modify_direction(&sword_deltax, &sword_deltay, SWORD);
+
+	// 여우와 물체의 충돌 체크
 	check_fox_crash(&fox_crash);
-	switch(set_key){
+
+	// 키보드 방향키 입력 받아서 방향 변경
+	switch(set_key){ 
 	case 0:	// left
 		fox_centerx -= SENSITIVITY;
 		break;
@@ -1061,6 +1222,7 @@ void timer(int value) {
 		fox_centery += SENSITIVITY;
 		break;
 	}
+	// 윈도우에 닿으면 방향 자동 변경
 	if(fox_centerx<-win_width/2.0f+2 * 28.0f)	// left (여우의 팔 가장 왼쪽이 -28.0f)
 		set_key=1;
 	else if(fox_centerx>win_width/2.0f-2*28.0f) // right (여우의 팔 가장 오른쪽이 +28.0f)
@@ -1125,7 +1287,8 @@ void initialize_OpenGL(void) {
 	glEnable(GL_MULTISAMPLE);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-	glClearColor(255 / 255.0f, 255 / 255.0f, 177 / 255.0f, 1.0f);
+	//glClearColor(255 / 255.0f, 255 / 255.0f, 177 / 255.0f, 1.0f);
+	glClearColor(80 / 255.0f, 230 / 255.0f, 250 / 255.0f, 1.0f);
 	ViewMatrix = glm::mat4(1.0f);
 }
 
