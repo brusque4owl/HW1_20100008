@@ -176,158 +176,6 @@ void draw_hat() {
 	glBindVertexArray(0);
 }
 
-#define CAKE_FIRE 0
-#define CAKE_CANDLE 1
-#define CAKE_BODY 2
-#define CAKE_BOTTOM 3
-#define CAKE_DECORATE 4
-
-GLfloat cake_fire[4][2] = { { -0.5, 14.0 }, { -0.5, 13.0 }, { 0.5, 13.0 }, { 0.5, 14.0 } };
-GLfloat cake_candle[4][2] = { { -1.0, 8.0 } ,{ -1.0, 13.0 },{ 1.0, 13.0 },{ 1.0, 8.0 } };
-GLfloat cake_body[4][2] = { { 8.0, 5.0 }, { -8.0, 5.0} ,{ -8.0, 8.0 }, { 8.0, 8.0 } };
-GLfloat cake_bottom[4][2] = { { -10.0, 1.0 },{ -10.0, 5.0 },{ 10.0, 5.0 }, {10.0, 1.0} };
-GLfloat cake_decorate[4][2] = { { -10.0, 0.0 },{ -10.0, 1.0 },{ 10.0, 1.0 },{ 10.0, 0.0 } };
-
-GLfloat cake_color[5][3] = {
-	{ 255 / 255.0f, 0 / 255.0f, 0 / 255.0f },
-	{ 255 / 255.0f, 204 / 255.0f, 0 / 255.0f },
-	{ 255 / 255.0f, 102 / 255.0f, 255 / 255.0f },
-	{ 255 / 255.0f, 102 / 255.0f, 255 / 255.0f },
-	{ 102 / 255.0f, 51 / 255.0f, 0 / 255.0f }
-};
-GLuint VBO_cake, VAO_cake;
-
-void prepare_cake() {
-	int size = sizeof(cake_fire);
-	GLsizeiptr buffer_size = sizeof(cake_fire) * 5;
-
-	// Initialize vertex buffer object.
-	glGenBuffers(1, &VBO_cake);
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO_cake);
-	glBufferData(GL_ARRAY_BUFFER, buffer_size, NULL, GL_STATIC_DRAW); // allocate buffer object memory
-
-	glBufferSubData(GL_ARRAY_BUFFER, 0, size, cake_fire);
-	glBufferSubData(GL_ARRAY_BUFFER, size, size, cake_candle);
-	glBufferSubData(GL_ARRAY_BUFFER, size * 2, size, cake_body);
-	glBufferSubData(GL_ARRAY_BUFFER, size * 3, size, cake_bottom);
-	glBufferSubData(GL_ARRAY_BUFFER, size * 4, size, cake_decorate);
-
-	// Initialize vertex array object.
-	glGenVertexArrays(1, &VAO_cake);
-	glBindVertexArray(VAO_cake);
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO_cake);
-	glVertexAttribPointer(LOC_VERTEX, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
-
-	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-}
-
-void draw_cake() {
-	glBindVertexArray(VAO_cake);
-
-	glUniform3fv(loc_primitive_color, 1, cake_color[CAKE_FIRE]);
-	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-
-	glUniform3fv(loc_primitive_color, 1, cake_color[CAKE_CANDLE]);
-	glDrawArrays(GL_TRIANGLE_FAN, 4, 8);
-
-	glUniform3fv(loc_primitive_color, 1, cake_color[CAKE_BODY]);
-	glDrawArrays(GL_TRIANGLE_FAN, 8, 12);
-
-	glUniform3fv(loc_primitive_color, 1, cake_color[CAKE_BOTTOM]);
-	glDrawArrays(GL_TRIANGLE_FAN, 12, 16);
-
-	glUniform3fv(loc_primitive_color, 1, cake_color[CAKE_DECORATE]);
-	glDrawArrays(GL_TRIANGLE_FAN, 16, 20);
-
-	glBindVertexArray(0);
-}
-
-#define SWORD_BODY 0
-#define SWORD_BODY2 1
-#define SWORD_HEAD 2
-#define SWORD_HEAD2 3
-#define SWORD_IN 4
-#define SWORD_DOWN 5
-#define SWORD_BODY_IN 6
-
-GLfloat sword_body[4][2] = { { -6.0, 0.0 },{ -6.0, -4.0 },{ 6.0, -4.0 },{ 6.0, 0.0 } };
-GLfloat sword_body2[4][2] = { { -2.0, -4.0 },{ -2.0, -6.0 } ,{ 2.0, -6.0 },{ 2.0, -4.0 } };
-GLfloat sword_head[4][2] = { { -2.0, 0.0 },{ -2.0, 16.0 } ,{ 2.0, 16.0 },{ 2.0, 0.0 } };
-GLfloat sword_head2[3][2] = { { -2.0, 16.0 },{ 0.0, 19.46 } ,{ 2.0, 16.0 } };
-GLfloat sword_in[4][2] = { { -0.3, 0.7 },{ -0.3, 15.3 } ,{ 0.3, 15.3 },{ 0.3, 0.7 } };
-GLfloat sword_down[4][2] = { { -2.0, -6.0 } ,{ 2.0, -6.0 },{ 4.0, -8.0 },{ -4.0, -8.0 } };
-GLfloat sword_body_in[4][2] = { { 0.0, -1.0 } ,{ 1.0, -2.732 },{ 0.0, -4.464 },{ -1.0, -2.732 } };
-
-GLfloat sword_color[7][3] = {
-	{ 139 / 255.0f, 69 / 255.0f, 19 / 255.0f },
-{ 139 / 255.0f, 69 / 255.0f, 19 / 255.0f },
-{ 155 / 255.0f, 155 / 255.0f, 155 / 255.0f },
-{ 155 / 255.0f, 155 / 255.0f, 155 / 255.0f },
-{ 0 / 255.0f, 0 / 255.0f, 0 / 255.0f },
-{ 139 / 255.0f, 69 / 255.0f, 19 / 255.0f },
-{ 255 / 255.0f, 0 / 255.0f, 0 / 255.0f }
-};
-
-GLuint VBO_sword, VAO_sword;
-void prepare_sword() {
-	GLsizeiptr buffer_size = sizeof(sword_body) + sizeof(sword_body2) + sizeof(sword_head) + sizeof(sword_head2) + sizeof(sword_in) + sizeof(sword_down) + sizeof(sword_body_in);
-
-	// Initialize vertex buffer object.
-	glGenBuffers(1, &VBO_sword);
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO_sword);
-	glBufferData(GL_ARRAY_BUFFER, buffer_size, NULL, GL_STATIC_DRAW); // allocate buffer object memory
-
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(sword_body), sword_body);
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(sword_body), sizeof(sword_body2), sword_body2);
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(sword_body) + sizeof(sword_body2), sizeof(sword_head), sword_head);
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(sword_body) + sizeof(sword_body2) + sizeof(sword_head), sizeof(sword_head2), sword_head2);
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(sword_body) + sizeof(sword_body2) + sizeof(sword_head) + sizeof(sword_head2), sizeof(sword_in), sword_in);
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(sword_body) + sizeof(sword_body2) + sizeof(sword_head) + sizeof(sword_head2) + sizeof(sword_in), sizeof(sword_down), sword_down);
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(sword_body) + sizeof(sword_body2) + sizeof(sword_head) + sizeof(sword_head2) + sizeof(sword_in) + sizeof(sword_down), sizeof(sword_body_in), sword_body_in);
-
-	// Initialize vertex array object.
-	glGenVertexArrays(1, &VAO_sword);
-	glBindVertexArray(VAO_sword);
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO_sword);
-	glVertexAttribPointer(LOC_VERTEX, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
-
-	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-}
-
-void draw_sword() {
-	glBindVertexArray(VAO_sword);
-
-	glUniform3fv(loc_primitive_color, 1, sword_color[SWORD_BODY]);
-	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-
-	glUniform3fv(loc_primitive_color, 1, sword_color[SWORD_BODY2]);
-	glDrawArrays(GL_TRIANGLE_FAN, 4, 4);
-
-	glUniform3fv(loc_primitive_color, 1, sword_color[SWORD_HEAD]);
-	glDrawArrays(GL_TRIANGLE_FAN, 8, 4);
-
-	glUniform3fv(loc_primitive_color, 1, sword_color[SWORD_HEAD2]);
-	glDrawArrays(GL_TRIANGLE_FAN, 12, 3);
-
-	glUniform3fv(loc_primitive_color, 1, sword_color[SWORD_IN]);
-	glDrawArrays(GL_TRIANGLE_FAN, 15, 4);
-
-	glUniform3fv(loc_primitive_color, 1, sword_color[SWORD_DOWN]);
-	glDrawArrays(GL_TRIANGLE_FAN, 19, 4);
-
-	glUniform3fv(loc_primitive_color, 1, sword_color[SWORD_BODY_IN]);
-	glDrawArrays(GL_TRIANGLE_FAN, 23, 4);
-
-	glBindVertexArray(0);
-}
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //			FOX_FIXED								                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -851,18 +699,6 @@ void display(void) {
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 	draw_hat();
 
-	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-300.0f, -5.0f, 0.0f));
-	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(5.0f, 5.0f, 1.0f));
-	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
-	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
-	draw_cake();
-
-	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(300.0f, 10.0f, 0.0f));
-	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(3.5f, 3.5f, 1.0f));
-	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
-	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
-	draw_sword();
-
 	//////////////////DRAW_FOX BELOW//////////////////////////
 	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(500.0f, 10.0f, 0.0f));
 	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
@@ -965,8 +801,6 @@ void initialize_OpenGL(void) {
 void prepare_scene(void) {
 	prepare_axes();
 	prepare_hat();
-	prepare_cake();
-	prepare_sword();
 	prepare_fox_fixed();
 	prepare_fox_arm_1();
 	prepare_fox_arm_2();
