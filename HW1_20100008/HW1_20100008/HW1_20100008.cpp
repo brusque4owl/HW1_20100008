@@ -726,7 +726,109 @@ void draw_fox_faces_basic() {
 	glBindVertexArray(0);
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//			FOX_FACES_CRASH							                       //
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#define FOX_CRASH_EYES_LEFT 0
+#define FOX_CRASH_EYES_RIGHT 1
+#define FOX_CRASH_NOSE 2
+#define FOX_CRASH_MOUTH_LINE_1 3
+#define FOX_CRASH_MOUTH_LINE_2 4
+#define FOX_CRASH_MOUTH_LINE_3 5
+#define FOX_CRASH_MOUTH_LINE_4 6
+
+/*
+/////////////////////////////////////////////
+GLfloat axes[4][2];
+GLfloat axes_color[3] = { 0.0f, 0.0f, 0.0f };
+GLuint VBO_axes, VAO_axes;
+
+void prepare_axes(void) { // Draw axes in their MC.
+	axes[0][0] = -win_width / 2.5f; axes[0][1] = 0.0f;
+	axes[1][0] = win_width / 2.5f; axes[1][1] = 0.0f;
+	axes[2][0] = 0.0f; axes[2][1] = -win_height / 2.5f;
+	axes[3][0] = 0.0f; axes[3][1] = win_height / 2.5f;
+//////////////////////////////////////////////////
+*/
+GLfloat fox_crash_eyes_left[4][2] = { { -2.0,26.0 },{ -8.0,32.0 },{ -2.0,32.0 },{ -8.0,26.0 } };
+GLfloat fox_crash_eyes_right[4][2] = { { 2.0,26.0 },{ 8.0,32.0 },{ 2.0,32.0 },{ 8.0,26.0 } };
+GLfloat fox_crash_nose[6][2] = { { -2.0,16.0 },{ -4.0,18.0 },{ -2.0,20.0 },{ 2.0,20.0 },{ 4.0,18.0 },{ 2.0,16.0 } };
+GLfloat fox_crash_mouth_line_1[2][2] = { { 0.0,16.0 },{ 0.0,12.0 } };		// vertical
+GLfloat fox_crash_mouth_line_2[2][2] = { { -2.0,12.0 },{ 2.0,12.0 } };		// horizontal
+GLfloat fox_crash_mouth_line_3[2][2] = { { -2.0,12.0 },{ -4.0,10.0 } };		// left
+GLfloat fox_crash_mouth_line_4[2][2] = { { 2.0,12.0 },{ 4.0,10.0 } };		// right
+
+GLfloat fox_faces_crash_color[7][3] = {
+	{ 70 / 255.0f, 90 / 255.0f, 53 / 255.0f },	// big_eyes_left
+	{ 70 / 255.0f, 90 / 255.0f, 53 / 255.0f },	// big_eyes_right
+	{ 39 / 255.0f, 13 / 255.0f, 12 / 255.0f },	// nose
+	{ 0 / 255.0f, 0 / 255.0f, 0 / 255.0f },		// mouth_line_1
+	{ 0 / 255.0f, 0 / 255.0f, 0 / 255.0f },		// mouth_line_2
+	{ 0 / 255.0f, 0 / 255.0f, 0 / 255.0f },		// mouth_line_3
+	{ 0 / 255.0f, 0 / 255.0f, 0 / 255.0f }		// mouth_line_4
+};
+
+GLuint VBO_fox_faces_crash, VAO_fox_faces_crash;
+void prepare_fox_faces_crash() {
+	GLsizeiptr buffer_size = sizeof(fox_crash_eyes_left) + sizeof(fox_crash_eyes_right)	+ sizeof(fox_crash_nose) + sizeof(fox_crash_mouth_line_1)
+		+ sizeof(fox_crash_mouth_line_2) + sizeof(fox_crash_mouth_line_3) + sizeof(fox_crash_mouth_line_4);
+
+	// Initialize vertex buffer object.
+	glGenBuffers(1, &VBO_fox_faces_crash);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_fox_faces_crash);
+	glBufferData(GL_ARRAY_BUFFER, buffer_size, NULL, GL_STATIC_DRAW); // allocate buffer object memory
+
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(fox_crash_eyes_left), fox_crash_eyes_left);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(fox_crash_eyes_left), sizeof(fox_crash_eyes_right), fox_crash_eyes_right);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(fox_crash_eyes_left) + sizeof(fox_crash_eyes_right), sizeof(fox_crash_nose), fox_crash_nose);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(fox_crash_eyes_left) + sizeof(fox_crash_eyes_right) + sizeof(fox_crash_nose), sizeof(fox_crash_mouth_line_1), 
+		fox_crash_mouth_line_1);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(fox_crash_eyes_left) + sizeof(fox_crash_eyes_right) + sizeof(fox_crash_nose) + sizeof(fox_crash_mouth_line_1), 
+		sizeof(fox_crash_mouth_line_2), fox_crash_mouth_line_2);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(fox_crash_eyes_left) + sizeof(fox_crash_eyes_right) + sizeof(fox_crash_nose) + sizeof(fox_crash_mouth_line_1) +
+		sizeof(fox_crash_mouth_line_2) , sizeof(fox_crash_mouth_line_3), fox_crash_mouth_line_3);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(fox_crash_eyes_left) + sizeof(fox_crash_eyes_right) + sizeof(fox_crash_nose) + sizeof(fox_crash_mouth_line_1) + 
+		sizeof(fox_crash_mouth_line_2) + sizeof(fox_crash_mouth_line_3) , sizeof(fox_crash_mouth_line_4), fox_crash_mouth_line_4);
+	// Initialize vertex array object.
+	glGenVertexArrays(1, &VAO_fox_faces_crash);
+	glBindVertexArray(VAO_fox_faces_crash);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_fox_faces_crash);
+	glVertexAttribPointer(LOC_VERTEX, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+}
+
+void draw_fox_faces_crash() {
+	glBindVertexArray(VAO_fox_faces_crash);
+
+	glUniform3fv(loc_primitive_color, 1, fox_faces_crash_color[FOX_CRASH_EYES_LEFT]);
+	glDrawArrays(GL_LINES, 0, 4);
+
+	glUniform3fv(loc_primitive_color, 1, fox_faces_crash_color[FOX_CRASH_EYES_RIGHT]);
+	glDrawArrays(GL_LINES, 4, 4);
+
+	glUniform3fv(loc_primitive_color, 1, fox_faces_crash_color[FOX_CRASH_NOSE]);
+	glDrawArrays(GL_TRIANGLE_FAN, 8, 6);
+
+	glUniform3fv(loc_primitive_color, 1, fox_faces_crash_color[FOX_CRASH_MOUTH_LINE_1]);
+	glDrawArrays(GL_LINES, 14, 2);
+
+	glUniform3fv(loc_primitive_color, 1, fox_faces_crash_color[FOX_CRASH_MOUTH_LINE_2]);
+	glDrawArrays(GL_LINES, 16, 2);
+
+	glUniform3fv(loc_primitive_color, 1, fox_faces_crash_color[FOX_CRASH_MOUTH_LINE_3]);
+	glDrawArrays(GL_LINES, 18, 2);
+
+	glUniform3fv(loc_primitive_color, 1, fox_faces_crash_color[FOX_CRASH_MOUTH_LINE_4]);
+	glDrawArrays(GL_LINES, 20, 2);
+
+	glBindVertexArray(0);
+}
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -790,7 +892,13 @@ void display(void) {
 	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
-	draw_fox_faces_basic();
+	//draw_fox_faces_basic();
+
+	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(500.0f, 10.0f, 0.0f));
+	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
+	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
+	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
+	draw_fox_faces_crash();
 
 	glFlush();
 }
@@ -864,6 +972,7 @@ void prepare_scene(void) {
 	prepare_fox_arm_2();
 	prepare_fox_leg_shoes();
 	prepare_fox_faces_basic();
+	prepare_fox_faces_crash();
 }
 
 void initialize_renderer(void) {
