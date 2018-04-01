@@ -21,8 +21,16 @@ glm::mat4 ViewMatrix, ProjectionMatrix, ViewProjectionMatrix;
 ///////////////////////////////////////////////////////////////////////////////////////
 /////////////////////     variables for objects          //////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
-GLfloat fox_place = 0.0f;
+GLfloat fox_centerx = 0.0f, fox_centery = 0.0f;
+bool fox_crash = 0;	// 0 for not crash, 1 for crashed; it is used in display()
 
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////       functions for objects			///////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+void check_fox_crash(bool *fox_crash){
+	if(*fox_crash==0)	*fox_crash = 1;
+	else				*fox_crash = 0;
+}
 ///////////////////////////////////////////////////////////////////////////////////////
 int win_width = 0, win_height = 0;
 float centerx = 0.0f, centery = 0.0f, rotate_angle = 0.0f;
@@ -386,11 +394,11 @@ void draw_car() {
 #define HAT_BODY 1
 #define HAT_STRIP 2
 #define HAT_BOTTOM 3
-
-GLfloat hat_leaf[4][2] = { { 3.0, 20.0 },{ 3.0, 28.0 },{ 9.0, 32.0 },{ 9.0, 24.0 } };
-GLfloat hat_body[4][2] = { {-19.5, 2.0}, {19.5, 2.0}, {15.0, 20.0}, {-15.0, 20.0} };
-GLfloat hat_strip[4][2] = { { -20.0, 0.0 },{ 20.0, 0.0 },{ 19.5, 2.0 },{ -19.5, 2.0 } };
-GLfloat hat_bottom[4][2] = { { 25.0, 0.0 },{ -25.0, 0.0 },{ -25.0, -4.0 },{ 25.0, -4.0 } };
+GLfloat a = 40.0f;
+GLfloat hat_leaf[4][2] = { { 1.5, a + 10.0 },{ 1.5, a + 14.0 },{ 4.5, a + 16.0 },{ 4.5, a + 12.0 } };
+GLfloat hat_body[4][2] = { { -7.5, a + 10.0 },{ -9.5, a + 1.0 },{ 9.5, a + 1.0 },{ 7.5, a + 10.0 } };
+GLfloat hat_strip[4][2] = { { -9.5, a + 2.0 },{ -10.0, a + 0.0 },{ 10.0, a + 0.0 },{ 9.5, a + 2.0 } };
+GLfloat hat_bottom[4][2] = { { 12.5, a + 0.0 },{ -12.5, a + 0.0 },{ -12.5, a + -4.0 },{ 12.5, a + -4.0 } };
 
 GLfloat hat_color[4][3] = {
 	{ 167 / 255.0f, 255 / 255.0f, 55 / 255.0f },
@@ -413,7 +421,7 @@ void prepare_hat() {
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(hat_leaf), sizeof(hat_body), hat_body);
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(hat_leaf) + sizeof(hat_body), sizeof(hat_strip), hat_strip);
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(hat_leaf) + sizeof(hat_body) + sizeof(hat_strip), sizeof(hat_bottom), hat_bottom);
-
+	
 	// Initialize vertex array object.
 	glGenVertexArrays(1, &VAO_hat);
 	glBindVertexArray(VAO_hat);
@@ -433,13 +441,13 @@ void draw_hat() {
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
 	glUniform3fv(loc_primitive_color, 1, hat_color[HAT_BODY]);
-	glDrawArrays(GL_TRIANGLE_FAN, 4, 8);
+	glDrawArrays(GL_TRIANGLE_FAN, 4, 4);
 
 	glUniform3fv(loc_primitive_color, 1, hat_color[HAT_STRIP]);
-	glDrawArrays(GL_TRIANGLE_FAN, 8, 12);
+	glDrawArrays(GL_TRIANGLE_FAN, 8, 4);
 
 	glUniform3fv(loc_primitive_color, 1, hat_color[HAT_BOTTOM]);
-	glDrawArrays(GL_TRIANGLE_FAN, 12, 16);
+	glDrawArrays(GL_TRIANGLE_FAN, 12, 4);
 
 	glBindVertexArray(0);
 }
@@ -454,15 +462,6 @@ void draw_hat() {
 #define FOX_FIXED_HEAD_BOTTOM 3
 #define FOX_FIXED_BODY_LEFT 4
 #define FOX_FIXED_BODY_RIGHT 5
-/* 원본
-GLfloat fox_fixed_head_ear_left[3][2] = { {-4.0,11.0},{-2.0,9.0},{-3.0,8.0} };
-GLfloat fox_fixed_head_ear_right[3][2] = { {4.0,11.0},{2.0,9.0},{3.0,8.0} };
-GLfloat fox_fixed_head_top[4][2] = { { -4.0,6.0 },{-2.0,9.0},{2.0,9.0},{4.0,6.0} };
-GLfloat fox_fixed_head_bottom[3][2] = { {-4.0,6.0},{0.0,2.0},{4.0,6.0} };
-GLfloat fox_fixed_body_left[4][2] = { {-3.0,-2.0},{-3.0,5.0},{0.0,2.0},{0.0,-2.0} };
-GLfloat fox_fixed_body_right[4][2] = { {3.0,-2.0 },{3.0,5.0},{0.0,2.0},{0.0,-2.0} };
-*/
-// 아래는 수정본
 GLfloat fox_fixed_head_ear_left[3][2] = { { -16.0,44.0 },{ -8.0,36.0 },{ -12.0,32.0 } };
 GLfloat fox_fixed_head_ear_right[3][2] = { { 16.0,44.0 },{ 8.0,36.0 },{ 12.0,32.0 } };
 GLfloat fox_fixed_head_top[4][2] = { { -16.0,24.0 },{ -8.0,36.0 },{ 8.0,36.0 },{ 16.0,24.0 } };
@@ -543,11 +542,6 @@ void draw_fox_fixed() {
 
 #define FOX_ARM_1_LEFT 0
 #define FOX_ARM_1_RIGHT 1
-/* 원본 
-GLfloat fox_arm_1_left[4][2] = { {3.0,5.0},{3.0,3.0},{7.0,1.0},{7.0,3.0} };
-GLfloat fox_arm_1_right[4][2] = { {-3.0,5.0},{-3.0,3.0},{-7.0,1.0},{-7.0,3.0} };
-*/
-//아래는 수정본
 GLfloat fox_arm_1_left[4][2] = { { 12.0,20.0 },{ 12.0,12.0 },{ 28.0,4.0 },{ 28.0,12.0 } };
 GLfloat fox_arm_1_right[4][2] = { { -12.0,20.0 },{ -12.0,12.0 },{ -28.0,4.0 },{ -28.0,12.0 } };
 
@@ -600,13 +594,6 @@ void draw_fox_arm_1() {
 #define FOX_ARM_2_BOTTOM_LEFT 1
 #define FOX_ARM_2_TOP_RIGHT 2
 #define FOX_ARM_2_BOTTOM_RIGHT 3
-/* 원본
-GLfloat fox_arm_2_top_left[4][2] = { { -3.0,3.0 },{ -3.0,5.0 },{ -6.0,3.0 },{ -6.0,1.0 } };
-GLfloat fox_arm_2_bottom_left[4][2] = { { -4.0,-1.0 },{ -4.0,1.0 },{ -6.0,3.0 },{ -6.0,1.0 } };
-GLfloat fox_arm_2_top_right[4][2] = { { 3.0,3.0 },{ 3.0,5.0 },{ 6.0,3.0 },{ 6.0,1.0 } };
-GLfloat fox_arm_2_bottom_right[4][2] = { { 4.0,-1.0 },{ 4.0,1.0 },{ 6.0,3.0 },{ 6.0,1.0 } };
-*/
-//아래는 수정본
 GLfloat fox_arm_2_top_left[4][2] = { { -12.0,12.0 },{ -12.0,20.0 },{ -24.0,12.0 },{ -24.0,4.0 } };
 GLfloat fox_arm_2_bottom_left[4][2] = { { -16.0,-4.0 },{ -16.0,4.0 },{ -24.0,12.0 },{ -24.0,4.0 } };
 GLfloat fox_arm_2_top_right[4][2] = { { 12.0,12.0 },{ 12.0,20.0 },{ 24.0,12.0 },{ 24.0,4.0 } };
@@ -672,13 +659,6 @@ void draw_fox_arm_2() {
 #define FOX_LEG_RIGHT 1
 #define FOX_SHOES_LEFT 2
 #define FOX_SHOES_RIGHT 3
-/* 원본
-GLfloat fox_leg_left[4][2] = { { -5.0,-6.0 },{ -2.0,-6.0 },{ 0.0,-2.0 },{ -3.0,-2.0 } };
-GLfloat fox_leg_right[4][2] = { { 5.0,-6.0 },{ 2.0,-6.0 },{ 0.0,-2.0 },{ 3.0,-2.0 } };
-GLfloat fox_shoes_left[4][2] = { {-2.0,-6.0},{-2.0,-8.0},{-6.0,-8.0},{-6.0,-6.0} };
-GLfloat fox_shoes_right[4][2] = { {2.0,-6.0},{2.0,-8.0},{6.0,-8.0},{6.0,-6.0} };
-*/
-//아래는 수정본
 GLfloat fox_leg_left[4][2] = { { -20.0,-24.0 },{ -8.0,-24.0 },{ 0.0,-8.0 },{ -12.0,-8.0 } };
 GLfloat fox_leg_right[4][2] = { { 20.0,-24.0 },{ 8.0,-24.0 },{ 0.0,-8.0 },{ 12.0,-8.0 } };
 GLfloat fox_shoes_left[4][2] = { { -8.0,-24.0 },{ -8.0,-32.0 },{ -24.0,-32.0 },{ -24.0,-24.0 } };
@@ -854,19 +834,6 @@ void draw_fox_faces_basic() {
 #define FOX_CRASH_MOUTH_LINE_3 5
 #define FOX_CRASH_MOUTH_LINE_4 6
 
-/*
-/////////////////////////////////////////////
-GLfloat axes[4][2];
-GLfloat axes_color[3] = { 0.0f, 0.0f, 0.0f };
-GLuint VBO_axes, VAO_axes;
-
-void prepare_axes(void) { // Draw axes in their MC.
-	axes[0][0] = -win_width / 2.5f; axes[0][1] = 0.0f;
-	axes[1][0] = win_width / 2.5f; axes[1][1] = 0.0f;
-	axes[2][0] = 0.0f; axes[2][1] = -win_height / 2.5f;
-	axes[3][0] = 0.0f; axes[3][1] = win_height / 2.5f;
-//////////////////////////////////////////////////
-*/
 GLfloat fox_crash_eyes_left[4][2] = { { -2.0,26.0 },{ -8.0,32.0 },{ -2.0,32.0 },{ -8.0,26.0 } };
 GLfloat fox_crash_eyes_right[4][2] = { { 2.0,26.0 },{ 8.0,32.0 },{ 2.0,32.0 },{ 8.0,26.0 } };
 GLfloat fox_crash_nose[6][2] = { { -2.0,16.0 },{ -4.0,18.0 },{ -2.0,20.0 },{ 2.0,20.0 },{ 4.0,18.0 },{ 2.0,16.0 } };
@@ -979,45 +946,59 @@ void display(void) {
 	draw_car();
 
 	//////////////////DRAW_FOX BELOW//////////////////////////
-	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(fox_place, 10.0f, 0.0f));
+	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(fox_centerx, fox_centery, 0.0f));
 	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
+	ModelMatrix = glm::rotate(ModelMatrix, rotate_angle, glm::vec3(0.0f, 0.0f, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 	draw_fox_fixed();
 
-	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(fox_place, 10.0f, 0.0f));
-	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
-	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
-	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
-	//draw_fox_arm_1();
+	if(fox_crash){
+	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(fox_centerx, fox_centery, 0.0f));
+		ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
+		ModelMatrix = glm::rotate(ModelMatrix, rotate_angle, glm::vec3(0.0f, 0.0f, 1.0f));
+		ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
+		glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
+		draw_fox_arm_1();
+	}
+	else{
+		ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(fox_centerx, fox_centery, 0.0f));
+		ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
+		ModelMatrix = glm::rotate(ModelMatrix, rotate_angle, glm::vec3(0.0f, 0.0f, 1.0f));
+		ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
+		glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
+		draw_fox_arm_2();
+	}
 
-	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(fox_place, 10.0f, 0.0f));
+	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(fox_centerx, fox_centery, 0.0f));
 	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
-	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
-	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
-	draw_fox_arm_2();
-
-	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(fox_place, 10.0f, 0.0f));
-	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
+	ModelMatrix = glm::rotate(ModelMatrix, rotate_angle, glm::vec3(0.0f, 0.0f, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 	draw_fox_leg_shoes();
 
-	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(fox_place, 10.0f, 0.0f));
-	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
-	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
-	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
-	//draw_fox_faces_basic();
-
-	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(fox_place, 10.0f, 0.0f));
-	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
-	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
-	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
-	draw_fox_faces_crash();
+	if(!fox_crash){
+		ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(fox_centerx, fox_centery, 0.0f));
+		ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
+		ModelMatrix = glm::rotate(ModelMatrix, rotate_angle, glm::vec3(0.0f, 0.0f, 1.0f));
+		ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
+		glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
+		draw_fox_faces_basic();
+	}
+	else{
+		ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(fox_centerx, fox_centery, 0.0f));
+		ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
+		ModelMatrix = glm::rotate(ModelMatrix, rotate_angle, glm::vec3(0.0f, 0.0f, 1.0f));
+		ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
+		glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
+		draw_fox_faces_crash();
+	}
 /////////////////////////finish fox//////////////////////////////////////////////////////////////////////
+	
+	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(fox_centerx, fox_centery, 0.0f));
+	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
+	ModelMatrix = glm::rotate(ModelMatrix, rotate_angle, glm::vec3(0.0f, 0.0f, 1.0f));
 
-	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 85.0f, 0.0f));
-	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 	draw_hat();
@@ -1025,12 +1006,9 @@ void display(void) {
 	glFlush();
 }
 
-void timer(int value){
-	glutPostRedisplay();
-	glutTimerFunc(30, timer, value);
-}
 void keyboard(unsigned char key, int x, int y) {
 	switch (key) {
+
 	case 27: // ESC key
 		glutLeaveMainLoop(); // Incur destuction callback for cleanups.
 		break;
@@ -1059,12 +1037,51 @@ void cleanup(void) {
 	glDeleteBuffers(1, &VBO_line);
 }
 
+void timer(int value) {
+	//static unsigned int fox_crash_counter = 0;
+	// check_fox_crash(call function) - in this function, if crashed, fox_crash = 1;
+	check_fox_crash(&fox_crash);
+	//if(fox_crash){
+		
+		//fox_crash_counter++;
+		//if(fox_crash_counter>4)
+			//fox_crash=0;
+	//}
+	glutPostRedisplay();
+	glutTimerFunc(1000, timer, value);
+}
+
+void special(int key, int x, int y) {
+#define SENSITIVITY 5.0
+	switch (key) {
+	case GLUT_KEY_LEFT:
+		fox_centerx -= SENSITIVITY;
+		rotate_angle += 90.0f*TO_RADIAN;
+		glutPostRedisplay();
+		break;
+	case GLUT_KEY_RIGHT:
+		fox_centerx += SENSITIVITY;
+		rotate_angle -= 90.0f*TO_RADIAN;
+		glutPostRedisplay();
+		break;
+	case GLUT_KEY_DOWN:
+		fox_centery -= SENSITIVITY;
+		glutPostRedisplay();
+		break;
+	case GLUT_KEY_UP:
+		fox_centery += SENSITIVITY;
+		glutPostRedisplay();
+		break;
+	}
+}
+
 void register_callbacks(void) {
 	glutDisplayFunc(display);
 	glutKeyboardFunc(keyboard);
 	glutReshapeFunc(reshape);
 	glutCloseFunc(cleanup);
 	glutTimerFunc(30, timer, 30);
+	glutSpecialFunc(special);
 }
 
 void prepare_shader_program(void) {
