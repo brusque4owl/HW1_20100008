@@ -178,7 +178,257 @@ void move_object(GLfloat deltax, GLfloat deltay, unsigned int object){
 	}
 }
 ///////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////
+//////////////// 충돌체 - airplane     ///////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+#define AIRPLANE_COLLIDER_1 0
+#define AIRPLANE_COLLIDER_2 1
 
+GLfloat airplane_collider_1[4][2] = { { -20.0, 25.0 },{ -20.0, 3.0 },{ 20.0, 3.0 },{ 20.0, 25.0 } };
+GLfloat airplane_collider_2[4][2] = { { -12.0, 3.0 },{ -12.0, -25.0 },{ 12.0, -25.0 },{ 12.0, 3.0 } };
+
+GLfloat airplane_collider_color[1][3] = {
+	{ 0 / 255.0f, 0 / 255.0f, 0 / 255.0f },
+};
+
+GLuint VBO_airplane_collider, VAO_airplane_collider;
+void prepare_airplane_collider() {
+	GLsizeiptr buffer_size = sizeof(airplane_collider_1) + sizeof(airplane_collider_2);
+
+	// Initialize vertex buffer object.
+	glGenBuffers(1, &VBO_airplane_collider);	//generate buffer object names
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_airplane_collider);	//bind a named buffer object
+	glBufferData(GL_ARRAY_BUFFER, buffer_size, NULL, GL_STATIC_DRAW); // allocate buffer object memory(create a new data store for a buffer object)
+
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(airplane_collider_1), airplane_collider_1);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(airplane_collider_1), sizeof(airplane_collider_2), airplane_collider_2);
+
+	// Initialize vertex array object.
+	glGenVertexArrays(1, &VAO_airplane_collider);
+	glBindVertexArray(VAO_airplane_collider);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_airplane_collider);
+	glVertexAttribPointer(LOC_VERTEX, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+}
+
+void draw_airplane_collider() {
+	glBindVertexArray(VAO_airplane_collider);
+
+	glUniform3fv(loc_primitive_color, 1, airplane_collider_color[AIRPLANE_COLLIDER_1]);
+	glDrawArrays(GL_LINE_LOOP, 0, 4);	// VBO에서 glBufferSubData로 정한 순서대로 나옴 
+
+	glUniform3fv(loc_primitive_color, 1, airplane_collider_color[AIRPLANE_COLLIDER_2]);
+	glDrawArrays(GL_LINE_LOOP, 4, 4);	// VBO에서 glBufferSubData로 정한 순서대로 나옴 
+
+	glBindVertexArray(0);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////
+//////////////// 충돌체 - house     ///////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+#define HOUSE_COLLIDER 0
+
+GLfloat house_collider[4][2] = { { -12.0, -14.0 },{ 12.0, -14.0 },{ 12.0, 14.0 },{ -12.0, 14.0 } };
+
+GLfloat house_collider_color[1][3] = {
+	{ 0 / 255.0f, 0 / 255.0f, 0 / 255.0f },
+};
+
+GLuint VBO_house_collider, VAO_house_collider;
+void prepare_house_collider() {
+	GLsizeiptr buffer_size = sizeof(house_collider);
+
+	// Initialize vertex buffer object.
+	glGenBuffers(1, &VBO_house_collider);	//generate buffer object names
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_house_collider);	//bind a named buffer object
+	glBufferData(GL_ARRAY_BUFFER, buffer_size, NULL, GL_STATIC_DRAW); // allocate buffer object memory(create a new data store for a buffer object)
+
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(house_collider), house_collider);	//updates a subset of a buffer object's data store
+	
+	// Initialize vertex array object.
+	glGenVertexArrays(1, &VAO_house_collider);
+	glBindVertexArray(VAO_house_collider);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_house_collider);
+	glVertexAttribPointer(LOC_VERTEX, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+}
+
+void draw_house_collider() {
+	glBindVertexArray(VAO_house_collider);
+
+	glUniform3fv(loc_primitive_color, 1, house_collider_color[HOUSE_COLLIDER]);
+	glDrawArrays(GL_LINE_LOOP, 0, 4);	// VBO에서 glBufferSubData로 정한 순서대로 나옴 
+
+	glBindVertexArray(0);
+}
+///////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////
+//////////////// 충돌체 - car     ///////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+#define CAR_COLLIDER 0
+
+GLfloat car_collider[4][2] = { { -16.0, -12.0 },{ -16.0, 10.0 },{ 16.0, 10.0 },{ 16.0, -12.0 } };
+
+GLfloat car_collider_color[1][3] = {
+	{ 0 / 255.0f, 0 / 255.0f, 0 / 255.0f },
+};
+
+GLuint VBO_car_collider, VAO_car_collider;
+void prepare_car_collider() {
+	GLsizeiptr buffer_size = sizeof(car_collider);
+
+	// Initialize vertex buffer object.
+	glGenBuffers(1, &VBO_car_collider);	//generate buffer object names
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_car_collider);	//bind a named buffer object
+	glBufferData(GL_ARRAY_BUFFER, buffer_size, NULL, GL_STATIC_DRAW); // allocate buffer object memory(create a new data store for a buffer object)
+
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(car_collider), car_collider);	//updates a subset of a buffer object's data store
+
+																					// Initialize vertex array object.
+	glGenVertexArrays(1, &VAO_car_collider);
+	glBindVertexArray(VAO_car_collider);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_car_collider);
+	glVertexAttribPointer(LOC_VERTEX, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+}
+
+void draw_car_collider() {
+	glBindVertexArray(VAO_car_collider);
+
+	glUniform3fv(loc_primitive_color, 1, car_collider_color[CAR_COLLIDER]);
+	glDrawArrays(GL_LINE_LOOP, 0, 4);	// VBO에서 glBufferSubData로 정한 순서대로 나옴 
+
+	glBindVertexArray(0);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////
+//////////////// 충돌체 - sword     ///////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+#define SWORD_COLLIDER_1 0
+#define SWORD_COLLIDER_2 1
+
+GLfloat sword_collider_1[4][2] = { { -2.0, 19.46 },{ -2.0, 0.0 },{ 2.0, 0.0 },{ 2.0, 19.46 } };
+GLfloat sword_collider_2[4][2] = { { -6.0, 0.0 },{ -6.0, -8.0 },{ 6.0, -8.0 },{ 6.0, 0.0 } };
+
+GLfloat sword_collider_color[1][3] = {
+	{ 0 / 255.0f, 0 / 255.0f, 0 / 255.0f },
+};
+
+GLuint VBO_sword_collider, VAO_sword_collider;
+void prepare_sword_collider() {
+	GLsizeiptr buffer_size = sizeof(sword_collider_1) + sizeof(sword_collider_2);
+
+	// Initialize vertex buffer object.
+	glGenBuffers(1, &VBO_sword_collider);	//generate buffer object names
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_sword_collider);	//bind a named buffer object
+	glBufferData(GL_ARRAY_BUFFER, buffer_size, NULL, GL_STATIC_DRAW); // allocate buffer object memory(create a new data store for a buffer object)
+
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(sword_collider_1), sword_collider_1);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(sword_collider_1), sizeof(sword_collider_2), sword_collider_2);
+
+	// Initialize vertex array object.
+	glGenVertexArrays(1, &VAO_sword_collider);
+	glBindVertexArray(VAO_sword_collider);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_sword_collider);
+	glVertexAttribPointer(LOC_VERTEX, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+}
+
+void draw_sword_collider() {
+	glBindVertexArray(VAO_sword_collider);
+
+	glUniform3fv(loc_primitive_color, 1, sword_collider_color[SWORD_COLLIDER_1]);
+	glDrawArrays(GL_LINE_LOOP, 0, 4);	// VBO에서 glBufferSubData로 정한 순서대로 나옴 
+
+	glUniform3fv(loc_primitive_color, 1, sword_collider_color[SWORD_COLLIDER_2]);
+	glDrawArrays(GL_LINE_LOOP, 4, 4);	// VBO에서 glBufferSubData로 정한 순서대로 나옴 
+
+	glBindVertexArray(0);
+}
+///////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////
+//////////////// 충돌체 - fox    ///////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+#define FOX_COLLIDER_1 0
+#define FOX_COLLIDER_2 1
+#define FOX_COLLIDER_3 2
+
+GLfloat fox_collider_1[4][2] = { { -16.0, 50.0 },{ -16.0, 24.0 },{ 16.0, 24.0 },{ 16.0, 50.0 } };
+GLfloat fox_collider_2[4][2] = { { -28.0, 24.0 },{ -28.0, -8.0 },{ 28.0, -8.0 },{ 28.0, 24.0 } };
+GLfloat fox_collider_3[4][2] = { { -24.0, -8.0 },{ -24.0, -32.0 },{ 24.0, -32.0 },{ 24.0, -8.0 } };
+
+GLfloat fox_collider_color[1][3] = {
+	{ 0 / 255.0f, 0 / 255.0f, 0 / 255.0f },
+};
+
+GLuint VBO_fox_collider, VAO_fox_collider;
+void prepare_fox_collider() {
+	GLsizeiptr buffer_size = sizeof(fox_collider_1) + sizeof(fox_collider_2) + sizeof(fox_collider_3);
+
+	// Initialize vertex buffer object.
+	glGenBuffers(1, &VBO_fox_collider);	//generate buffer object names
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_fox_collider);	//bind a named buffer object
+	glBufferData(GL_ARRAY_BUFFER, buffer_size, NULL, GL_STATIC_DRAW); // allocate buffer object memory(create a new data store for a buffer object)
+
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(fox_collider_1), fox_collider_1);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(fox_collider_1), sizeof(fox_collider_2), fox_collider_2);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(fox_collider_1)+sizeof(fox_collider_2), sizeof(fox_collider_3), fox_collider_3);
+
+	// Initialize vertex array object.
+	glGenVertexArrays(1, &VAO_fox_collider);
+	glBindVertexArray(VAO_fox_collider);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_fox_collider);
+	glVertexAttribPointer(LOC_VERTEX, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+}
+
+void draw_fox_collider() {
+	glBindVertexArray(VAO_fox_collider);
+
+	glUniform3fv(loc_primitive_color, 1, fox_collider_color[FOX_COLLIDER_1]);
+	glDrawArrays(GL_LINE_LOOP, 0, 4);	// VBO에서 glBufferSubData로 정한 순서대로 나옴 
+
+	glUniform3fv(loc_primitive_color, 1, fox_collider_color[FOX_COLLIDER_2]);
+	glDrawArrays(GL_LINE_LOOP, 4, 4);	// VBO에서 glBufferSubData로 정한 순서대로 나옴 
+
+	glUniform3fv(loc_primitive_color, 1, fox_collider_color[FOX_COLLIDER_3]);
+	glDrawArrays(GL_LINE_LOOP, 8, 4);	// VBO에서 glBufferSubData로 정한 순서대로 나옴 
+
+	glBindVertexArray(0);
+}
+
+
+
+
+///////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
 GLfloat axes[4][2];
 GLfloat axes_color[3] = { 0.0f, 0.0f, 0.0f };
 GLuint VBO_axes, VAO_axes;
@@ -1160,6 +1410,7 @@ void display(void) {
 
 	//ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-500.0f, 0.0f, 0.0f));
 	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(airplane_centerx, airplane_centery, 0.0f));
+	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 	draw_airplane();
@@ -1240,6 +1491,38 @@ void display(void) {
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 	draw_hat();
+
+/////////////////////// start collider ////////////////////////////////
+	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(airplane_centerx, airplane_centery, 0.0f));
+	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
+	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
+	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
+	draw_airplane_collider();
+
+	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(house_centerx, house_centery, 0.0f));
+	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
+	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
+	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
+	draw_house_collider();
+
+	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(car_centerx, car_centery, 0.0f));
+	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
+	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
+	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
+	draw_car_collider();
+
+	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(sword_centerx, sword_centery, 0.0f));
+	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
+	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
+	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
+	draw_sword_collider();
+	
+	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(fox_centerx, fox_centery, 0.0f));
+	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
+	ModelMatrix = glm::rotate(ModelMatrix, rotate_angle, glm::vec3(0.0f, 0.0f, 1.0f));
+	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
+	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
+	draw_fox_collider();
 
 	glFlush();
 }
@@ -1398,7 +1681,11 @@ void prepare_scene(void) {
 	prepare_fox_leg_shoes();
 	prepare_fox_faces_basic();
 	prepare_fox_faces_crash();
-
+	prepare_airplane_collider();
+	prepare_house_collider();
+	prepare_car_collider();
+	prepare_sword_collider();
+	prepare_fox_collider();
 }
 
 void initialize_renderer(void) {
