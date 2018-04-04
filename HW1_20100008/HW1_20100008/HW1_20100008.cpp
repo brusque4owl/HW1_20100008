@@ -35,18 +35,26 @@ glm::mat4 ViewMatrix, ProjectionMatrix, ViewProjectionMatrix;
 #define SWORD 3
 
 // 물체의 초기 좌표
+/*
 GLfloat fox_centerx = 0.0f, fox_centery = 0.0f;
 GLfloat airplane_centerx = -500.0f, airplane_centery = 0.0f;
 GLfloat house_centerx = -100.0f, house_centery = 0.0f;
 GLfloat car_centerx = 100.0f, car_centery = 0.0f;
 GLfloat sword_centerx = 300.0f, sword_centery = 0.0f;
+*/
+GLfloat fox_centerx = 0.0f, fox_centery = 0.0f;
+GLfloat airplane_centerx = 0.0f, airplane_centery = 0.0f;
+GLfloat house_centerx = 0.0f, house_centery = 0.0f;
+GLfloat car_centerx = 0.0f, car_centery = 0.0f;
+GLfloat sword_centerx = 0.0f, sword_centery = 0.0f;
+
 bool fox_crash = 0;	// 0 for not crash, 1 for crashed; it is used in display()
 unsigned int set_key = 0;	// 0 for left, 1 for right, 2 for down, 3 for up
 
 // 물체의 deltax, deltay 값
 GLfloat airplane_deltax = -10.0, airplane_deltay = -10.0;
 GLfloat house_deltax = -10.0, house_deltay = 10.0;
-GLfloat car_deltax = 6.0, car_deltay = -4.0;
+GLfloat car_deltax = 16.0, car_deltay = 7.0;
 GLfloat sword_deltax = 7.0, sword_deltay = 3.0;
 
 // collider에 사용할 구조체
@@ -68,10 +76,26 @@ float centerx = 0.0f, centery = 0.0f, rotate_angle = 0.0f;
 ///////////////////////////////////////////////////////////////////////////////////////
 ///////////////////       functions for objects			///////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
+#define TWICE
+#ifdef TWICE
+	#define MULTIPLE 2.0
+#else
+	#define MULTIPLE 1.0
+#endif
 // 충돌 체크 함수
-bool check_crash(int x0, int x1, int y0, int y1, int a0, int a1, int b0, int b1){
+bool check_crash(struct collider_rect object1, struct collider_rect object2){
 	
-	return true;
+	printf("airplane : x0=%f\tx1=%f\ty0=%f\ty1=%f\t\nfox  : x0=%f\tx1=%f\ty0=%f\ty1=%f\t\n", object1.x0, object1.x1, object1.y0, object1.y1, object2.x0, object2.x1, object2.y0, object2.y1);
+	printf("airplane.left<fox.right = %f<%f\t result:%d\n", object1.x0, object2.x1, object1.x0<object2.x1);
+	printf("airplane.right>fox.left = %f>%f\t result:%d\n", object1.x1, object2.x0, object1.x1>object2.x0);
+	printf("airplane.top>fox.bottom = %f>%f\t result:%d\n", object1.y0, object2.y1, object1.y0>object2.y1);
+	printf("airplane.bottom<fox.top = %f<%f\t result:%d\n", object1.y1, object2.y0, object1.y1<object2.y0);
+	printf("airplane centerx : %f\t airplane centery : %f\t fox centerx : %f\t fox centery : %f\n", airplane_centerx, airplane_centery, fox_centerx, fox_centery);
+	
+	if (object1.x0<object2.x1 && object1.x1>object2.x0 && object1.y0>object2.y1 && object1.y1<object2.y0) {
+		return true;
+	}
+	else return false;
 }
 
 //여우와 물체 간의 충돌 체크
@@ -196,6 +220,7 @@ void move_object(GLfloat deltax, GLfloat deltay, unsigned int object){
 		sword_centerx += deltax;
 		sword_centery += deltay;
 	}
+
 }
 ///////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////
@@ -205,23 +230,23 @@ void move_object(GLfloat deltax, GLfloat deltay, unsigned int object){
 #define AIRPLANE_COLLIDER_DOWN 1
 #define AIRPLANE_UP_X0 -20.0
 #define AIRPLANE_UP_X1 20.0
-#define AIRPLANE_UP_Y0 3.0
-#define AIRPLANE_UP_Y1 25.0
+#define AIRPLANE_UP_Y0 25.0
+#define AIRPLANE_UP_Y1 3.0
 #define AIRPLANE_DOWN_X0 -12.0
 #define AIRPLANE_DOWN_X1 12.0
-#define AIRPLANE_DOWN_Y0 -25.0
-#define AIRPLANE_DOWN_Y1 3.0
-
-struct collider_rect struct_airplane_up = {airplane_centerx+AIRPLANE_UP_X0,airplane_centerx+AIRPLANE_UP_X1,
-									airplane_centery+AIRPLANE_UP_Y0,airplane_centery+AIRPLANE_UP_Y1};
-struct collider_rect struct_airplane_down = { airplane_centerx + AIRPLANE_DOWN_X0,airplane_centerx + AIRPLANE_DOWN_X1,
-									airplane_centery + AIRPLANE_DOWN_Y0,airplane_centery + AIRPLANE_DOWN_Y1 };
+#define AIRPLANE_DOWN_Y0 3.0
+#define AIRPLANE_DOWN_Y1 -25.0
 
 GLfloat airplane_collider_up[4][2] = { { -20.0, 25.0 },{ -20.0, 3.0 },{ 20.0, 3.0 },{ 20.0, 25.0 } };
 GLfloat airplane_collider_down[4][2] = { { -12.0, 3.0 },{ -12.0, -25.0 },{ 12.0, -25.0 },{ 12.0, 3.0 } };
+struct collider_rect struct_airplane_up = { airplane_centerx + AIRPLANE_UP_X0,airplane_centerx + AIRPLANE_UP_X1,
+airplane_centery + AIRPLANE_UP_Y0,airplane_centery + AIRPLANE_UP_Y1 };
+struct collider_rect struct_airplane_down = { airplane_centerx + AIRPLANE_DOWN_X0,airplane_centerx + AIRPLANE_DOWN_X1,
+airplane_centery + AIRPLANE_DOWN_Y0,airplane_centery + AIRPLANE_DOWN_Y1 };
 
-GLfloat airplane_collider_color[1][3] = {
+GLfloat airplane_collider_color[2][3] = {
 	{ 0 / 255.0f, 0 / 255.0f, 0 / 255.0f },
+	{ 0 / 255.0f, 0 / 255.0f, 0 / 255.0f }
 };
 
 GLuint VBO_airplane_collider, VAO_airplane_collider;
@@ -268,16 +293,15 @@ void draw_airplane_collider() {
 #define HOUSE_COLLIDER 0
 #define HOUSE_X0 -12.0
 #define HOUSE_X1 12.0
-#define HOUSE_Y0 -14.0
-#define HOUSE_Y1 14.0
-
-struct collider_rect struct_house = { house_centerx + HOUSE_X0,house_centerx + HOUSE_X1,
-							   house_centery + HOUSE_Y0,house_centery + HOUSE_Y1 };
+#define HOUSE_Y0 14.0
+#define HOUSE_Y1 -14.0
 
 GLfloat house_collider[4][2] = { { -12.0, -14.0 },{ 12.0, -14.0 },{ 12.0, 14.0 },{ -12.0, 14.0 } };
+struct collider_rect struct_house = { house_centerx + HOUSE_X0,house_centerx + HOUSE_X1,
+	house_centery + HOUSE_Y0,house_centery + HOUSE_Y1 };
 
 GLfloat house_collider_color[1][3] = {
-	{ 0 / 255.0f, 0 / 255.0f, 0 / 255.0f },
+	{ 0 / 255.0f, 0 / 255.0f, 0 / 255.0f }
 };
 
 GLuint VBO_house_collider, VAO_house_collider;
@@ -319,15 +343,15 @@ void draw_house_collider() {
 #define CAR_COLLIDER 0
 #define CAR_X0 -16.0
 #define CAR_X1 16.0
-#define CAR_Y0 -12.0
-#define CAR_Y1 10.0
+#define CAR_Y0 10.0
+#define CAR_Y1 -12.0
 
 GLfloat car_collider[4][2] = { { -16.0, -12.0 },{ -16.0, 10.0 },{ 16.0, 10.0 },{ 16.0, -12.0 } };
 struct collider_rect struct_car = { car_centerx + CAR_X0,car_centerx + CAR_X1,
 	car_centery + CAR_Y0,car_centery + CAR_Y1 };
 
 GLfloat car_collider_color[1][3] = {
-	{ 0 / 255.0f, 0 / 255.0f, 0 / 255.0f },
+	{ 0 / 255.0f, 0 / 255.0f, 0 / 255.0f }
 };
 
 GLuint VBO_car_collider, VAO_car_collider;
@@ -371,24 +395,25 @@ void draw_car_collider() {
 #define SWORD_COLLIDER_DOWN 1
 #define SWORD_UP_X0 -2.0
 #define SWORD_UP_X1 2.0
-#define SWORD_UP_Y0 0.0
-#define SWORD_UP_Y1 19.46
+#define SWORD_UP_Y0 19.46
+#define SWORD_UP_Y1 0.0
 #define SWORD_DOWN_X0 -6.0
 #define SWORD_DOWN_X1 6.0
-#define SWORD_DOWN_Y0 -8.0
-#define SWORD_DOWN_Y1 0.0
+#define SWORD_DOWN_Y0 0.0
+#define SWORD_DOWN_Y1 -8.0
 
 
 GLfloat sword_collider_up[4][2] = { { -2.0, 19.46 },{ -2.0, 0.0 },{ 2.0, 0.0 },{ 2.0, 19.46 } };
 GLfloat sword_collider_down[4][2] = { { -6.0, 0.0 },{ -6.0, -8.0 },{ 6.0, -8.0 },{ 6.0, 0.0 } };
+
+GLfloat sword_collider_color[2][3] = {
+	{ 0 / 255.0f, 0 / 255.0f, 0 / 255.0f },
+	{ 0 / 255.0f, 0 / 255.0f, 0 / 255.0f }
+};
 struct collider_rect struct_sword_up = { sword_centerx + SWORD_UP_X0,sword_centerx + SWORD_UP_X1,
 	sword_centery + SWORD_UP_Y0,sword_centery + SWORD_UP_Y1 };
 struct collider_rect struct_sword_down = { sword_centerx + SWORD_DOWN_X0,sword_centerx + SWORD_DOWN_X1,
 	sword_centery + SWORD_DOWN_Y0,sword_centery + SWORD_DOWN_Y1 };
-
-GLfloat sword_collider_color[1][3] = {
-	{ 0 / 255.0f, 0 / 255.0f, 0 / 255.0f },
-};
 
 GLuint VBO_sword_collider, VAO_sword_collider;
 void prepare_sword_collider() {
@@ -435,20 +460,27 @@ void draw_sword_collider() {
 #define FOX_COLLIDER_DOWN 2
 #define FOX_UP_X0 -16.0
 #define FOX_UP_X1 16.0
-#define FOX_UP_Y0 24.0
-#define FOX_UP_Y1 50.0
+#define FOX_UP_Y0 50.0
+#define FOX_UP_Y1 24.0
 #define FOX_MID_X0 -28.0
 #define FOX_MID_X1 28.0
-#define FOX_MID_Y0 -8.0
-#define FOX_MID_Y1 24.0
+#define FOX_MID_Y0 24.0
+#define FOX_MID_Y1 -8.0
 #define FOX_DOWN_X0 -24.0
 #define FOX_DOWN_X1 24.0
-#define FOX_DOWN_Y0 -32.0
-#define FOX_DOWN_Y1 -8.0
+#define FOX_DOWN_Y0 -8.0
+#define FOX_DOWN_Y1 -32.0
 
 GLfloat fox_collider_up[4][2] = { { -16.0, 50.0 },{ -16.0, 24.0 },{ 16.0, 24.0 },{ 16.0, 50.0 } };
 GLfloat fox_collider_mid[4][2] = { { -28.0, 24.0 },{ -28.0, -8.0 },{ 28.0, -8.0 },{ 28.0, 24.0 } };
 GLfloat fox_collider_down[4][2] = { { -24.0, -8.0 },{ -24.0, -32.0 },{ 24.0, -32.0 },{ 24.0, -8.0 } };
+
+
+GLfloat fox_collider_color[3][3] = {
+	{ 0 / 255.0f, 0 / 255.0f, 0 / 255.0f },
+	{ 0 / 255.0f, 0 / 255.0f, 0 / 255.0f },
+	{ 0 / 255.0f, 0 / 255.0f, 0 / 255.0f }
+};
 struct collider_rect struct_fox_up = { fox_centerx + FOX_UP_X0,fox_centerx + FOX_UP_X1,
 	fox_centery + FOX_UP_Y0,fox_centery + FOX_UP_Y1 };
 struct collider_rect struct_fox_mid = { fox_centerx + FOX_MID_X0,fox_centerx + FOX_MID_X1,
@@ -456,9 +488,6 @@ struct collider_rect struct_fox_mid = { fox_centerx + FOX_MID_X0,fox_centerx + F
 struct collider_rect struct_fox_down = { fox_centerx + FOX_DOWN_X0,fox_centerx + FOX_DOWN_X1,
 	fox_centery + FOX_DOWN_Y0,fox_centery + FOX_DOWN_Y1 };
 
-GLfloat fox_collider_color[1][3] = {
-	{ 0 / 255.0f, 0 / 255.0f, 0 / 255.0f },
-};
 
 GLuint VBO_fox_collider, VAO_fox_collider;
 void prepare_fox_collider() {
@@ -499,6 +528,83 @@ void draw_fox_collider() {
 	glDrawArrays(GL_LINE_LOOP, 8, 4);	// VBO에서 glBufferSubData로 정한 순서대로 나옴 
 
 	glBindVertexArray(0);
+}
+
+//// 충돌 관련 함수
+// collider_rect 구조체 업데이트 함수
+void update_collider(void) {
+	struct_airplane_up.x0 = MULTIPLE*(airplane_centerx + AIRPLANE_UP_X0);
+	struct_airplane_up.x1 = MULTIPLE*(airplane_centerx + AIRPLANE_UP_X1);
+	struct_airplane_up.y0 = MULTIPLE*(airplane_centery + AIRPLANE_UP_Y0);
+	struct_airplane_up.y1 = MULTIPLE*(airplane_centery + AIRPLANE_UP_Y1);
+
+	struct_airplane_down.x0 = MULTIPLE*(airplane_centerx + AIRPLANE_DOWN_X0);
+	struct_airplane_down.x1 = MULTIPLE*(airplane_centerx + AIRPLANE_DOWN_X1);
+	struct_airplane_down.y0 = MULTIPLE*(airplane_centery + AIRPLANE_DOWN_Y0);
+	struct_airplane_down.y1 = MULTIPLE*(airplane_centery + AIRPLANE_DOWN_Y1);
+	/*
+	struct_airplane_up.x0 = airplane_centerx + AIRPLANE_UP_X0;
+	struct_airplane_up.x1 = airplane_centerx + AIRPLANE_UP_X1;
+	struct_airplane_up.y0 = airplane_centery + AIRPLANE_UP_Y0;
+	struct_airplane_up.y1 = airplane_centery + AIRPLANE_UP_Y1;
+
+	struct_airplane_down.x0 = airplane_centerx + AIRPLANE_DOWN_X0;
+	struct_airplane_down.x1 = airplane_centerx + AIRPLANE_DOWN_X1;
+	struct_airplane_down.y0 = airplane_centery + AIRPLANE_DOWN_Y0;
+	struct_airplane_down.y1 = airplane_centery + AIRPLANE_DOWN_Y1;
+	*/
+	struct_house.x0 = house_centerx + HOUSE_X0;
+	struct_house.x1 = house_centerx + HOUSE_X1;
+	struct_house.y0 = house_centery + HOUSE_Y0;
+	struct_house.y1 = house_centery + HOUSE_Y1;
+
+	struct_car.x0 = car_centerx + CAR_X0;
+	struct_car.x1 = car_centerx + CAR_X1;
+	struct_car.y0 = car_centery + CAR_Y0;
+	struct_car.y1 = car_centery + CAR_Y1;
+
+	struct_sword_up.x0 = sword_centerx + SWORD_UP_X0;
+	struct_sword_up.x1 = sword_centerx + SWORD_UP_X1;
+	struct_sword_up.y0 = sword_centery + SWORD_UP_Y0;
+	struct_sword_up.y1 = sword_centery + SWORD_UP_Y1;
+
+	struct_sword_down.x0 = sword_centerx + SWORD_DOWN_X0;
+	struct_sword_down.x1 = sword_centerx + SWORD_DOWN_X1;
+	struct_sword_down.y0 = sword_centery + SWORD_DOWN_Y0;
+	struct_sword_down.y1 = sword_centery + SWORD_DOWN_Y1;
+
+	
+	struct_fox_up.x0 = MULTIPLE*(fox_centerx + FOX_UP_X0);
+	struct_fox_up.x1 = MULTIPLE*(fox_centerx + FOX_UP_X1);
+	struct_fox_up.y0 = MULTIPLE*(fox_centery + FOX_UP_Y0);
+	struct_fox_up.y1 = MULTIPLE*(fox_centery + FOX_UP_Y1);
+
+	struct_fox_mid.x0 = MULTIPLE*(fox_centerx + FOX_MID_X0);
+	struct_fox_mid.x1 = MULTIPLE*(fox_centerx + FOX_MID_X1);
+	struct_fox_mid.y0 = MULTIPLE*(fox_centery + FOX_MID_Y0);
+	struct_fox_mid.y1 = MULTIPLE*(fox_centery + FOX_MID_Y1);
+
+	struct_fox_down.x0 = MULTIPLE*(fox_centerx + FOX_DOWN_X0);
+	struct_fox_down.x1 = MULTIPLE*(fox_centerx + FOX_DOWN_X1);
+	struct_fox_down.y0 = MULTIPLE*(fox_centery + FOX_DOWN_Y0);
+	struct_fox_down.y1 = MULTIPLE*(fox_centery + FOX_DOWN_Y1);
+	
+	/*
+	struct_fox_up.x0 = fox_centerx + FOX_UP_X0;
+	struct_fox_up.x1 = fox_centerx + FOX_UP_X1;
+	struct_fox_up.y0 = fox_centery + FOX_UP_Y0;
+	struct_fox_up.y1 = fox_centery + FOX_UP_Y1;
+
+	struct_fox_mid.x0 = fox_centerx + FOX_MID_X0;
+	struct_fox_mid.x1 = fox_centerx + FOX_MID_X1;
+	struct_fox_mid.y0 = fox_centery + FOX_MID_Y0;
+	struct_fox_mid.y1 = fox_centery + FOX_MID_Y1;
+
+	struct_fox_down.x0 = fox_centerx + FOX_DOWN_X0;
+	struct_fox_down.x1 = fox_centerx + FOX_DOWN_X1;
+	struct_fox_down.y0 = fox_centery + FOX_DOWN_Y0;
+	struct_fox_down.y1 = fox_centery + FOX_DOWN_Y1;
+	*/
 }
 
 
@@ -1487,6 +1593,7 @@ void display(void) {
 
 	//ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-500.0f, 0.0f, 0.0f));
 	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(airplane_centerx, airplane_centery, 0.0f));
+	//ModelMatrix = glm::scale(ModelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
 	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
@@ -1497,23 +1604,24 @@ void display(void) {
 	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
-	draw_house();
+	//draw_house();
 
 	//ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(100.0f, 0.0f, 0.0f));
 	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(car_centerx, car_centery, 0.0f));
 	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
-	draw_car();
+	//draw_car();
 
 	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(sword_centerx, sword_centery, 0.0f));
 	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
-	draw_sword();
+	//draw_sword();
 
 	//////////////////DRAW_FOX BELOW//////////////////////////
 	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(fox_centerx, fox_centery, 0.0f));
+	//ModelMatrix = glm::scale(ModelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
 	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
 	ModelMatrix = glm::rotate(ModelMatrix, rotate_angle, glm::vec3(0.0f, 0.0f, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
@@ -1522,6 +1630,7 @@ void display(void) {
 
 	if(fox_crash){
 	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(fox_centerx, fox_centery, 0.0f));
+		//ModelMatrix = glm::scale(ModelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
 		ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
 		ModelMatrix = glm::rotate(ModelMatrix, rotate_angle, glm::vec3(0.0f, 0.0f, 1.0f));
 		ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
@@ -1530,6 +1639,7 @@ void display(void) {
 	}
 	else{
 		ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(fox_centerx, fox_centery, 0.0f));
+		//ModelMatrix = glm::scale(ModelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
 		ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
 		ModelMatrix = glm::rotate(ModelMatrix, rotate_angle, glm::vec3(0.0f, 0.0f, 1.0f));
 		ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
@@ -1538,6 +1648,7 @@ void display(void) {
 	}
 
 	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(fox_centerx, fox_centery, 0.0f));
+	//ModelMatrix = glm::scale(ModelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
 	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
 	ModelMatrix = glm::rotate(ModelMatrix, rotate_angle, glm::vec3(0.0f, 0.0f, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
@@ -1546,6 +1657,7 @@ void display(void) {
 
 	if(!fox_crash){
 		ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(fox_centerx, fox_centery, 0.0f));
+		//ModelMatrix = glm::scale(ModelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
 		ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
 		ModelMatrix = glm::rotate(ModelMatrix, rotate_angle, glm::vec3(0.0f, 0.0f, 1.0f));
 		ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
@@ -1554,6 +1666,7 @@ void display(void) {
 	}
 	else{
 		ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(fox_centerx, fox_centery, 0.0f));
+		//ModelMatrix = glm::scale(ModelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
 		ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
 		ModelMatrix = glm::rotate(ModelMatrix, rotate_angle, glm::vec3(0.0f, 0.0f, 1.0f));
 		ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
@@ -1563,6 +1676,7 @@ void display(void) {
 /////////////////////////finish fox//////////////////////////////////////////////////////////////////////
 	
 	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(fox_centerx, fox_centery, 0.0f));
+	//ModelMatrix = glm::scale(ModelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
 	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
 	ModelMatrix = glm::rotate(ModelMatrix, rotate_angle, glm::vec3(0.0f, 0.0f, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
@@ -1571,6 +1685,7 @@ void display(void) {
 
 /////////////////////// start collider ////////////////////////////////
 	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(airplane_centerx, airplane_centery, 0.0f));
+	//ModelMatrix = glm::scale(ModelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
 	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
@@ -1580,21 +1695,22 @@ void display(void) {
 	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
-	draw_house_collider();
+	//draw_house_collider();
 
 	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(car_centerx, car_centery, 0.0f));
 	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
-	draw_car_collider();
+	//draw_car_collider();
 
 	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(sword_centerx, sword_centery, 0.0f));
 	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
-	draw_sword_collider();
+	//draw_sword_collider();
 	
 	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(fox_centerx, fox_centery, 0.0f));
+	//ModelMatrix = glm::scale(ModelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
 	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
 	ModelMatrix = glm::rotate(ModelMatrix, rotate_angle, glm::vec3(0.0f, 0.0f, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
@@ -1639,6 +1755,7 @@ void cleanup(void) {
 void timer(int value) {
 #define SENSITIVITY 5.0
 #define PERIOD 20
+	update_collider();
 	static unsigned int total_time = 0;	// 프로그램 시작 후부터 timer 실행시마다 1씩 카운트 됨.
 	if(total_time%PERIOD==0|| total_time % PERIOD == 1 || total_time % PERIOD == 2 || total_time % PERIOD == 3){
 			rotate_angle = rotate_angle + 90.0f*TO_RADIAN;
@@ -1659,6 +1776,68 @@ void timer(int value) {
 
 	// 여우와 물체의 충돌 체크
 	check_fox_crash(&fox_crash);
+	/*
+	check_crash(struct_airplane_up, struct_house);
+	check_crash(struct_airplane_up, struct_car);
+	check_crash(struct_airplane_up, struct_sword_up);
+	check_crash(struct_airplane_up, struct_sword_down);
+	check_crash(struct_airplane_up, struct_fox_up);
+	check_crash(struct_airplane_up, struct_fox_mid);
+	check_crash(struct_airplane_up, struct_fox_down);
+
+	check_crash(struct_airplane_down, struct_house);
+	check_crash(struct_airplane_down, struct_car);
+	check_crash(struct_airplane_down, struct_sword_up);
+	check_crash(struct_airplane_down, struct_sword_down);
+	check_crash(struct_airplane_down, struct_fox_up);
+	check_crash(struct_airplane_down, struct_fox_mid);
+	check_crash(struct_airplane_down, struct_fox_down);
+
+	check_crash(struct_house, struct_car);
+	check_crash(struct_house, struct_sword_up);
+	check_crash(struct_house, struct_sword_down);
+	check_crash(struct_house, struct_fox_up);
+	check_crash(struct_house, struct_fox_mid);
+	check_crash(struct_house, struct_fox_down);
+	
+	check_crash(struct_car, struct_sword_up);
+	check_crash(struct_car, struct_sword_down);
+	check_crash(struct_car, struct_fox_up);
+	check_crash(struct_car, struct_fox_mid);
+	check_crash(struct_car, struct_fox_down);
+
+	check_crash(struct_sword_up, struct_fox_up);
+	check_crash(struct_sword_up, struct_fox_mid);
+	check_crash(struct_sword_up, struct_fox_down);
+
+	check_crash(struct_sword_down, struct_fox_up);
+	check_crash(struct_sword_down, struct_fox_mid);
+	check_crash(struct_sword_down, struct_fox_down);
+	*/
+	if(check_crash(struct_airplane_up, struct_fox_up)) printf("충돌발생 : airplane_up, fox_up\n");
+	if(check_crash(struct_airplane_up, struct_fox_mid)) printf("충돌발생 : airplane_up, fox_mid\n");
+	if(check_crash(struct_airplane_up, struct_fox_down)) printf("충돌발생 : airplane_up, fox_down\n");
+	if(check_crash(struct_airplane_down, struct_fox_up)) printf("충돌발생 : airplane_down, fox_up\n");
+	if(check_crash(struct_airplane_down, struct_fox_mid)) printf("충돌발생 : airplane_down, fox_mid\n");
+	if(check_crash(struct_airplane_down, struct_fox_down)) printf("충돌발생 : airplane_down, fox_down\n");
+	printf("MULTIPLE : %f\n", MULTIPLE);
+	printf("\n\n");
+	/*
+	if(check_crash(struct_house, struct_fox_up)) printf("house, fox_up\n");
+	if(check_crash(struct_house, struct_fox_mid)) printf("house, fox_mid\n");
+	if(check_crash(struct_house, struct_fox_down)) printf("house, fox_down\n");
+	if(check_crash(struct_car, struct_fox_up)) printf("car, fox_up\n");
+	if(check_crash(struct_car, struct_fox_mid)) printf("car, fox_mid\n");
+	if(check_crash(struct_car, struct_fox_down)) printf("car, fox_down\n");
+	if(check_crash(struct_sword_up, struct_fox_up)) printf("sword_up, fox_up\n");
+	if(check_crash(struct_sword_up, struct_fox_mid)) printf("sword_up, fox_mid\n");
+	if(check_crash(struct_sword_up, struct_fox_down)) printf("sword_up, fox_down\n");
+	if(check_crash(struct_sword_down, struct_fox_up)) printf("sword_down, fox_up\n");
+	if(check_crash(struct_sword_down, struct_fox_mid)) printf("sword_down, fox_mid\n");
+	if(check_crash(struct_sword_down, struct_fox_down)) printf("sword_down, fox_down\n");
+	*/
+	//if (temp == TRUE)
+		//printf("결과 : %d\n", temp);
 
 	// 키보드 방향키 입력 받아서 방향 변경
 	switch(set_key){ 
