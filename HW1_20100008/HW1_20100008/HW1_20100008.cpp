@@ -92,17 +92,7 @@ GLfloat arr_endpoint[4][4]= {	{-20.0,20.0,25.0,-25.0},	// [object number][x0,x1,
 								{-6.0,6.0,19.46,-8.0}
 							};
 
-/*
-// 윈도우에 닿으면 여우의 방향 자동 변경
-if (fox_centerx<-win_width / 2.0f + MULTIPLE * 28.0f)	// left (여우의 팔 가장 왼쪽이 -28.0f)
-	set_key = 1; // 1 for right
-else if (fox_centerx>win_width / 2.0f - MULTIPLE * 28.0f) // right (여우의 팔 가장 오른쪽이 +28.0f)
-set_key = 0; // 0 for left
-else if (fox_centery<-win_height / 2.0f + MULTIPLE * 32.0f) // down  (여우의 신발 가장 아래가 -32.0f)
-	set_key = 2; // 2 for up
-else if (fox_centery>win_height / 2.0f - MULTIPLE * 56.0f) // up (여우의 모자 leaf 가장 위가 +56.0f)
-set_key = 3; // 3 for down
-*/
+
 //윈도우와 물체 간의 충돌 체크
 unsigned int check_direction(GLfloat object_centerx, GLfloat object_centery, int object_number){  
 	if(object_centerx<-win_width/2.0f - MULTIPLE * arr_endpoint[object_number][0]) // touch left
@@ -115,18 +105,6 @@ unsigned int check_direction(GLfloat object_centerx, GLfloat object_centery, int
 		return TOUCH_DOWN;
 	else								// not touch any place
 		return TOUCH_NOTHING;
-	/*
-	if(object_centerx<-win_width/2.0f)	// touch left
-		return TOUCH_LEFT;
-	else if(object_centerx>win_width/2.0f) // touch right
-		return TOUCH_RIGHT;
-	else if(object_centery<-win_height/2.0f) // touch down
-		return TOUCH_DOWN;
-	else if(object_centery>win_height/2.0f) // touch up
-		return TOUCH_UP;
-	else								// not touch any place
-		return TOUCH_NOTHING;
-	*/
 }
 
 GLfloat setting_deltax(unsigned int object){
