@@ -22,6 +22,7 @@ glm::mat4 ViewMatrix, ProjectionMatrix, ViewProjectionMatrix;
 ///////////////////////////////////////////////////////////////////////////////////////
 /////////////////////     variables for objects          //////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
+#define BLOW_OFF_HAT 10.0f
 #define TOUCH_LEFT 0
 #define TOUCH_RIGHT 1
 #define TOUCH_DOWN 2
@@ -1629,7 +1630,10 @@ void display(void) {
 	}
 /////////////////////////finish fox//////////////////////////////////////////////////////////////////////
 	
-	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(fox_centerx, fox_centery, 0.0f));
+	if(fox_crash)
+		ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(fox_centerx, fox_centery+BLOW_OFF_HAT, 0.0f));
+	else	
+		ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(fox_centerx, fox_centery, 0.0f));
 	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(MULTIPLE, MULTIPLE, 1.0f));
 	ModelMatrix = glm::rotate(ModelMatrix, rotate_angle, glm::vec3(0.0f, 0.0f, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
