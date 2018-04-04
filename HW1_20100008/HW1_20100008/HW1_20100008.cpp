@@ -36,86 +36,32 @@ glm::mat4 ViewMatrix, ProjectionMatrix, ViewProjectionMatrix;
 
 // 물체의 초기 좌표
 GLfloat fox_centerx = 0.0f, fox_centery = 0.0f;
-GLfloat airplane_centerx = 0.0f, airplane_centery = 0.0f;
-GLfloat house_centerx = 0.0f, house_centery = 0.0f;
-GLfloat car_centerx = 0.0f, car_centery = 0.0f;
-GLfloat sword_centerx = 0.0f, sword_centery = 0.0f;
-
+GLfloat airplane_centerx = -500.0f, airplane_centery = 0.0f;
+GLfloat house_centerx = -100.0f, house_centery = 0.0f;
+GLfloat car_centerx = 100.0f, car_centery = 0.0f;
+GLfloat sword_centerx = 300.0f, sword_centery = 0.0f;
 bool fox_crash = 0;	// 0 for not crash, 1 for crashed; it is used in display()
 unsigned int set_key = 0;	// 0 for left, 1 for right, 2 for down, 3 for up
 
 // 물체의 deltax, deltay 값
 GLfloat airplane_deltax = -10.0, airplane_deltay = -10.0;
 GLfloat house_deltax = -10.0, house_deltay = 10.0;
-GLfloat car_deltax = 16.0, car_deltay = 7.0;
+GLfloat car_deltax = 6.0, car_deltay = -4.0;
 GLfloat sword_deltax = 7.0, sword_deltay = 3.0;
-
-// collider에 사용할 구조체
-struct collider_rect {
-	GLfloat x0;
-	GLfloat x1;
-	GLfloat y0;
-	GLfloat y1;
-};
-
-struct collider_tri {
-	GLfloat v0;
-	GLfloat v1;
-	GLfloat v2;
-};
 
 int win_width = 0, win_height = 0;
 float centerx = 0.0f, centery = 0.0f, rotate_angle = 0.0f;
-int time_interval = 100;
 ///////////////////////////////////////////////////////////////////////////////////////
 ///////////////////       functions for objects			///////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
-GLfloat setting_deltax(unsigned int object);
-GLfloat setting_deltay(unsigned int object);
-#define TWICE
-#ifdef TWICE
-	#define MULTIPLE 2.0
-#else
-	#define MULTIPLE 1.0
-#endif
-// 충돌 체크 함수
-bool check_crash(struct collider_rect object1, struct collider_rect object2){
-	if (object1.x0<object2.x1 && object1.x1>object2.x0 && object1.y0>object2.y1 && object1.y1<object2.y0) {		
-		return true;
-	}
-	else return false;
+//여우와 물체 간의 충돌 체크
+void check_fox_crash(bool *fox_crash){
+	if(*fox_crash==0)	*fox_crash = 1;
+	else				*fox_crash = 0;
 }
 
-GLfloat arr_endpoint[4][4]= {	{-20.0,20.0,25.0,-25.0},	// [object number][x0,x1,y0,y1]
-								{-12.0,12.0,14.0,-14.0},
-								{-16.0,16.0,10.0,-12.0 },
-								{-6.0,6.0,19.46,-8.0}
-							};
-
-/*
-// 윈도우에 닿으면 여우의 방향 자동 변경
-if (fox_centerx<-win_width / 2.0f + MULTIPLE * 28.0f)	// left (여우의 팔 가장 왼쪽이 -28.0f)
-	set_key = 1; // 1 for right
-else if (fox_centerx>win_width / 2.0f - MULTIPLE * 28.0f) // right (여우의 팔 가장 오른쪽이 +28.0f)
-set_key = 0; // 0 for left
-else if (fox_centery<-win_height / 2.0f + MULTIPLE * 32.0f) // down  (여우의 신발 가장 아래가 -32.0f)
-	set_key = 2; // 2 for up
-else if (fox_centery>win_height / 2.0f - MULTIPLE * 56.0f) // up (여우의 모자 leaf 가장 위가 +56.0f)
-set_key = 3; // 3 for down
-*/
 //윈도우와 물체 간의 충돌 체크
-unsigned int check_direction(GLfloat object_centerx, GLfloat object_centery, int object_number){  
-	if(object_centerx<-win_width/2.0f - MULTIPLE * arr_endpoint[object_number][0]) // touch left
-		return TOUCH_LEFT;
-	else if (object_centerx>win_width / 2.0f - MULTIPLE * arr_endpoint[object_number][1]) // touch right
-		return TOUCH_RIGHT;
-	else if (object_centery>win_height / 2.0f - MULTIPLE * arr_endpoint[object_number][2]) // touch up
-		return TOUCH_UP;
-	else if (object_centery<-win_height / 2.0f - MULTIPLE * arr_endpoint[object_number][3]) // touch down
-		return TOUCH_DOWN;
-	else								// not touch any place
-		return TOUCH_NOTHING;
-	/*
+unsigned int check_direction(GLfloat object_centerx, GLfloat object_centery){  
 	if(object_centerx<-win_width/2.0f)	// touch left
 		return TOUCH_LEFT;
 	else if(object_centerx>win_width/2.0f) // touch right
@@ -126,7 +72,6 @@ unsigned int check_direction(GLfloat object_centerx, GLfloat object_centery, int
 		return TOUCH_UP;
 	else								// not touch any place
 		return TOUCH_NOTHING;
-	*/
 }
 
 GLfloat setting_deltax(unsigned int object){
@@ -150,21 +95,21 @@ GLfloat setting_deltay(unsigned int object) {
 		return sword_deltay;
 }
 
-// 물체의 이동 방향 수정(윈도우와 충돌시)
+// 물체의 이동 방향 수정
 void modify_direction(GLfloat *deltax, GLfloat *deltay, unsigned int object){  // object 0:airplane / 1:house / 2:car / 3:sword
 	unsigned int touch_place;
 	switch(object){
 	case AIRPLANE:
-		touch_place = check_direction(airplane_centerx, airplane_centery, AIRPLANE);
+		touch_place = check_direction(airplane_centerx, airplane_centery);
 		break;
 	case HOUSE:
-		touch_place = check_direction(house_centerx, house_centery, HOUSE);
+		touch_place = check_direction(house_centerx, house_centery);
 		break;
 	case CAR:
-		touch_place = check_direction(car_centerx, car_centery, CAR);
+		touch_place = check_direction(car_centerx, car_centery);
 		break;
 	case SWORD:
-		touch_place = check_direction(sword_centerx, sword_centery, SWORD);
+		touch_place = check_direction(sword_centerx, sword_centery);
 		break;
 	}
 	if(touch_place==TOUCH_NOTHING) return;
@@ -231,373 +176,9 @@ void move_object(GLfloat deltax, GLfloat deltay, unsigned int object){
 		sword_centerx += deltax;
 		sword_centery += deltay;
 	}
-
 }
 ///////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////
-//////////////// 충돌체 - airplane     ///////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-#define AIRPLANE_COLLIDER_UP 0
-#define AIRPLANE_COLLIDER_DOWN 1
-#define AIRPLANE_UP_X0 -20.0
-#define AIRPLANE_UP_X1 20.0
-#define AIRPLANE_UP_Y0 25.0
-#define AIRPLANE_UP_Y1 3.0
-#define AIRPLANE_DOWN_X0 -12.0
-#define AIRPLANE_DOWN_X1 12.0
-#define AIRPLANE_DOWN_Y0 3.0
-#define AIRPLANE_DOWN_Y1 -25.0
 
-GLfloat airplane_collider_up[4][2] = { { -20.0, 25.0 },{ -20.0, 3.0 },{ 20.0, 3.0 },{ 20.0, 25.0 } };
-GLfloat airplane_collider_down[4][2] = { { -12.0, 3.0 },{ -12.0, -25.0 },{ 12.0, -25.0 },{ 12.0, 3.0 } };
-struct collider_rect struct_airplane_up = { airplane_centerx + AIRPLANE_UP_X0,airplane_centerx + AIRPLANE_UP_X1,
-airplane_centery + AIRPLANE_UP_Y0,airplane_centery + AIRPLANE_UP_Y1 };
-struct collider_rect struct_airplane_down = { airplane_centerx + AIRPLANE_DOWN_X0,airplane_centerx + AIRPLANE_DOWN_X1,
-airplane_centery + AIRPLANE_DOWN_Y0,airplane_centery + AIRPLANE_DOWN_Y1 };
-
-GLfloat airplane_collider_color[2][3] = {
-	{ 0 / 255.0f, 0 / 255.0f, 0 / 255.0f },
-	{ 0 / 255.0f, 0 / 255.0f, 0 / 255.0f }
-};
-
-GLuint VBO_airplane_collider, VAO_airplane_collider;
-void prepare_airplane_collider() {
-	GLsizeiptr buffer_size = sizeof(airplane_collider_up) + sizeof(airplane_collider_down);
-
-	// Initialize vertex buffer object.
-	glGenBuffers(1, &VBO_airplane_collider);	//generate buffer object names
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO_airplane_collider);	//bind a named buffer object
-	glBufferData(GL_ARRAY_BUFFER, buffer_size, NULL, GL_STATIC_DRAW); // allocate buffer object memory(create a new data store for a buffer object)
-
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(airplane_collider_up), airplane_collider_up);
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(airplane_collider_up), sizeof(airplane_collider_down), airplane_collider_down);
-
-	// Initialize vertex array object.
-	glGenVertexArrays(1, &VAO_airplane_collider);
-	glBindVertexArray(VAO_airplane_collider);
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO_airplane_collider);
-	glVertexAttribPointer(LOC_VERTEX, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
-
-	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-}
-
-void draw_airplane_collider() {
-	glBindVertexArray(VAO_airplane_collider);
-
-	glUniform3fv(loc_primitive_color, 1, airplane_collider_color[AIRPLANE_COLLIDER_UP]);
-	glDrawArrays(GL_LINE_LOOP, 0, 4);	// VBO에서 glBufferSubData로 정한 순서대로 나옴 
-
-	glUniform3fv(loc_primitive_color, 1, airplane_collider_color[AIRPLANE_COLLIDER_DOWN]);
-	glDrawArrays(GL_LINE_LOOP, 4, 4);	// VBO에서 glBufferSubData로 정한 순서대로 나옴 
-
-	glBindVertexArray(0);
-}
-
-///////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////
-//////////////// 충돌체 - house     ///////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-#define HOUSE_COLLIDER 0
-#define HOUSE_X0 -12.0
-#define HOUSE_X1 12.0
-#define HOUSE_Y0 14.0
-#define HOUSE_Y1 -14.0
-
-GLfloat house_collider[4][2] = { { -12.0, -14.0 },{ 12.0, -14.0 },{ 12.0, 14.0 },{ -12.0, 14.0 } };
-struct collider_rect struct_house = { house_centerx + HOUSE_X0,house_centerx + HOUSE_X1,
-	house_centery + HOUSE_Y0,house_centery + HOUSE_Y1 };
-
-GLfloat house_collider_color[1][3] = {
-	{ 0 / 255.0f, 0 / 255.0f, 0 / 255.0f }
-};
-
-GLuint VBO_house_collider, VAO_house_collider;
-void prepare_house_collider() {
-	GLsizeiptr buffer_size = sizeof(house_collider);
-
-	// Initialize vertex buffer object.
-	glGenBuffers(1, &VBO_house_collider);	//generate buffer object names
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO_house_collider);	//bind a named buffer object
-	glBufferData(GL_ARRAY_BUFFER, buffer_size, NULL, GL_STATIC_DRAW); // allocate buffer object memory(create a new data store for a buffer object)
-
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(house_collider), house_collider);	//updates a subset of a buffer object's data store
-	
-	// Initialize vertex array object.
-	glGenVertexArrays(1, &VAO_house_collider);
-	glBindVertexArray(VAO_house_collider);
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO_house_collider);
-	glVertexAttribPointer(LOC_VERTEX, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
-
-	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-}
-
-void draw_house_collider() {
-	glBindVertexArray(VAO_house_collider);
-
-	glUniform3fv(loc_primitive_color, 1, house_collider_color[HOUSE_COLLIDER]);
-	glDrawArrays(GL_LINE_LOOP, 0, 4);	// VBO에서 glBufferSubData로 정한 순서대로 나옴 
-
-	glBindVertexArray(0);
-}
-///////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////
-//////////////// 충돌체 - car     ///////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-#define CAR_COLLIDER 0
-#define CAR_X0 -16.0
-#define CAR_X1 16.0
-#define CAR_Y0 10.0
-#define CAR_Y1 -12.0
-
-GLfloat car_collider[4][2] = { { -16.0, -12.0 },{ -16.0, 10.0 },{ 16.0, 10.0 },{ 16.0, -12.0 } };
-struct collider_rect struct_car = { car_centerx + CAR_X0,car_centerx + CAR_X1,
-	car_centery + CAR_Y0,car_centery + CAR_Y1 };
-
-GLfloat car_collider_color[1][3] = {
-	{ 0 / 255.0f, 0 / 255.0f, 0 / 255.0f }
-};
-
-GLuint VBO_car_collider, VAO_car_collider;
-void prepare_car_collider() {
-	GLsizeiptr buffer_size = sizeof(car_collider);
-
-	// Initialize vertex buffer object.
-	glGenBuffers(1, &VBO_car_collider);	//generate buffer object names
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO_car_collider);	//bind a named buffer object
-	glBufferData(GL_ARRAY_BUFFER, buffer_size, NULL, GL_STATIC_DRAW); // allocate buffer object memory(create a new data store for a buffer object)
-
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(car_collider), car_collider);	//updates a subset of a buffer object's data store
-
-																					// Initialize vertex array object.
-	glGenVertexArrays(1, &VAO_car_collider);
-	glBindVertexArray(VAO_car_collider);
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO_car_collider);
-	glVertexAttribPointer(LOC_VERTEX, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
-
-	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-}
-
-void draw_car_collider() {
-	glBindVertexArray(VAO_car_collider);
-
-	glUniform3fv(loc_primitive_color, 1, car_collider_color[CAR_COLLIDER]);
-	glDrawArrays(GL_LINE_LOOP, 0, 4);	// VBO에서 glBufferSubData로 정한 순서대로 나옴 
-
-	glBindVertexArray(0);
-}
-
-///////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////
-//////////////// 충돌체 - sword     ///////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-#define SWORD_COLLIDER_UP 0
-#define SWORD_COLLIDER_DOWN 1
-#define SWORD_UP_X0 -2.0
-#define SWORD_UP_X1 2.0
-#define SWORD_UP_Y0 19.46
-#define SWORD_UP_Y1 0.0
-#define SWORD_DOWN_X0 -6.0
-#define SWORD_DOWN_X1 6.0
-#define SWORD_DOWN_Y0 0.0
-#define SWORD_DOWN_Y1 -8.0
-
-
-GLfloat sword_collider_up[4][2] = { { -2.0, 19.46 },{ -2.0, 0.0 },{ 2.0, 0.0 },{ 2.0, 19.46 } };
-GLfloat sword_collider_down[4][2] = { { -6.0, 0.0 },{ -6.0, -8.0 },{ 6.0, -8.0 },{ 6.0, 0.0 } };
-
-GLfloat sword_collider_color[2][3] = {
-	{ 0 / 255.0f, 0 / 255.0f, 0 / 255.0f },
-	{ 0 / 255.0f, 0 / 255.0f, 0 / 255.0f }
-};
-struct collider_rect struct_sword_up = { sword_centerx + SWORD_UP_X0,sword_centerx + SWORD_UP_X1,
-	sword_centery + SWORD_UP_Y0,sword_centery + SWORD_UP_Y1 };
-struct collider_rect struct_sword_down = { sword_centerx + SWORD_DOWN_X0,sword_centerx + SWORD_DOWN_X1,
-	sword_centery + SWORD_DOWN_Y0,sword_centery + SWORD_DOWN_Y1 };
-
-GLuint VBO_sword_collider, VAO_sword_collider;
-void prepare_sword_collider() {
-	GLsizeiptr buffer_size = sizeof(sword_collider_up) + sizeof(sword_collider_down);
-
-	// Initialize vertex buffer object.
-	glGenBuffers(1, &VBO_sword_collider);	//generate buffer object names
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO_sword_collider);	//bind a named buffer object
-	glBufferData(GL_ARRAY_BUFFER, buffer_size, NULL, GL_STATIC_DRAW); // allocate buffer object memory(create a new data store for a buffer object)
-
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(sword_collider_up), sword_collider_up);
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(sword_collider_up), sizeof(sword_collider_down), sword_collider_down);
-
-	// Initialize vertex array object.
-	glGenVertexArrays(1, &VAO_sword_collider);
-	glBindVertexArray(VAO_sword_collider);
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO_sword_collider);
-	glVertexAttribPointer(LOC_VERTEX, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
-
-	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-}
-
-void draw_sword_collider() {
-	glBindVertexArray(VAO_sword_collider);
-
-	glUniform3fv(loc_primitive_color, 1, sword_collider_color[SWORD_COLLIDER_UP]);
-	glDrawArrays(GL_LINE_LOOP, 0, 4);	// VBO에서 glBufferSubData로 정한 순서대로 나옴 
-
-	glUniform3fv(loc_primitive_color, 1, sword_collider_color[SWORD_COLLIDER_DOWN]);
-	glDrawArrays(GL_LINE_LOOP, 4, 4);	// VBO에서 glBufferSubData로 정한 순서대로 나옴 
-
-	glBindVertexArray(0);
-}
-///////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////
-//////////////// 충돌체 - fox    ///////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-#define FOX_COLLIDER_UP 0
-#define FOX_COLLIDER_MID 1
-#define FOX_COLLIDER_DOWN 2
-#define FOX_UP_X0 -16.0
-#define FOX_UP_X1 16.0
-#define FOX_UP_Y0 50.0
-#define FOX_UP_Y1 24.0
-#define FOX_MID_X0 -28.0
-#define FOX_MID_X1 28.0
-#define FOX_MID_Y0 24.0
-#define FOX_MID_Y1 -8.0
-#define FOX_DOWN_X0 -24.0
-#define FOX_DOWN_X1 24.0
-#define FOX_DOWN_Y0 -8.0
-#define FOX_DOWN_Y1 -32.0
-
-GLfloat fox_collider_up[4][2] = { { -16.0, 50.0 },{ -16.0, 24.0 },{ 16.0, 24.0 },{ 16.0, 50.0 } };
-GLfloat fox_collider_mid[4][2] = { { -28.0, 24.0 },{ -28.0, -8.0 },{ 28.0, -8.0 },{ 28.0, 24.0 } };
-GLfloat fox_collider_down[4][2] = { { -24.0, -8.0 },{ -24.0, -32.0 },{ 24.0, -32.0 },{ 24.0, -8.0 } };
-
-
-GLfloat fox_collider_color[3][3] = {
-	{ 0 / 255.0f, 0 / 255.0f, 0 / 255.0f },
-	{ 0 / 255.0f, 0 / 255.0f, 0 / 255.0f },
-	{ 0 / 255.0f, 0 / 255.0f, 0 / 255.0f }
-};
-struct collider_rect struct_fox_up = { fox_centerx + FOX_UP_X0,fox_centerx + FOX_UP_X1,
-	fox_centery + FOX_UP_Y0,fox_centery + FOX_UP_Y1 };
-struct collider_rect struct_fox_mid = { fox_centerx + FOX_MID_X0,fox_centerx + FOX_MID_X1,
-	fox_centery + FOX_MID_Y0,fox_centery + FOX_MID_Y1 };
-struct collider_rect struct_fox_down = { fox_centerx + FOX_DOWN_X0,fox_centerx + FOX_DOWN_X1,
-	fox_centery + FOX_DOWN_Y0,fox_centery + FOX_DOWN_Y1 };
-
-
-GLuint VBO_fox_collider, VAO_fox_collider;
-void prepare_fox_collider() {
-	GLsizeiptr buffer_size = sizeof(fox_collider_up) + sizeof(fox_collider_mid) + sizeof(fox_collider_down);
-
-	// Initialize vertex buffer object.
-	glGenBuffers(1, &VBO_fox_collider);	//generate buffer object names
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO_fox_collider);	//bind a named buffer object
-	glBufferData(GL_ARRAY_BUFFER, buffer_size, NULL, GL_STATIC_DRAW); // allocate buffer object memory(create a new data store for a buffer object)
-
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(fox_collider_up), fox_collider_up);
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(fox_collider_up), sizeof(fox_collider_mid), fox_collider_mid);
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(fox_collider_up)+sizeof(fox_collider_mid), sizeof(fox_collider_down), fox_collider_down);
-
-	// Initialize vertex array object.
-	glGenVertexArrays(1, &VAO_fox_collider);
-	glBindVertexArray(VAO_fox_collider);
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO_fox_collider);
-	glVertexAttribPointer(LOC_VERTEX, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
-
-	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-}
-
-void draw_fox_collider() {
-	glBindVertexArray(VAO_fox_collider);
-
-	glUniform3fv(loc_primitive_color, 1, fox_collider_color[FOX_COLLIDER_UP]);
-	glDrawArrays(GL_LINE_LOOP, 0, 4);	// VBO에서 glBufferSubData로 정한 순서대로 나옴 
-
-	glUniform3fv(loc_primitive_color, 1, fox_collider_color[FOX_COLLIDER_MID]);
-	glDrawArrays(GL_LINE_LOOP, 4, 4);	// VBO에서 glBufferSubData로 정한 순서대로 나옴 
-
-	glUniform3fv(loc_primitive_color, 1, fox_collider_color[FOX_COLLIDER_DOWN]);
-	glDrawArrays(GL_LINE_LOOP, 8, 4);	// VBO에서 glBufferSubData로 정한 순서대로 나옴 
-
-	glBindVertexArray(0);
-}
-////////////// 충돌체 제작 완료 //////////////////////
-
-//// 충돌 관련 함수
-// collider_rect 구조체 업데이트 함수
-void update_collider(void) {
-	struct_airplane_up.x0 = MULTIPLE*(airplane_centerx + AIRPLANE_UP_X0);
-	struct_airplane_up.x1 = MULTIPLE*(airplane_centerx + AIRPLANE_UP_X1);
-	struct_airplane_up.y0 = MULTIPLE*(airplane_centery + AIRPLANE_UP_Y0);
-	struct_airplane_up.y1 = MULTIPLE*(airplane_centery + AIRPLANE_UP_Y1);
-
-	struct_airplane_down.x0 = MULTIPLE*(airplane_centerx + AIRPLANE_DOWN_X0);
-	struct_airplane_down.x1 = MULTIPLE*(airplane_centerx + AIRPLANE_DOWN_X1);
-	struct_airplane_down.y0 = MULTIPLE*(airplane_centery + AIRPLANE_DOWN_Y0);
-	struct_airplane_down.y1 = MULTIPLE*(airplane_centery + AIRPLANE_DOWN_Y1);
-
-	struct_house.x0 = MULTIPLE*(house_centerx + HOUSE_X0);
-	struct_house.x1 = MULTIPLE * (house_centerx + HOUSE_X1);
-	struct_house.y0 = MULTIPLE * (house_centery + HOUSE_Y0);
-	struct_house.y1 = MULTIPLE * (house_centery + HOUSE_Y1);
-
-	struct_car.x0 = MULTIPLE * (car_centerx + CAR_X0);
-	struct_car.x1 = MULTIPLE * (car_centerx + CAR_X1);
-	struct_car.y0 = MULTIPLE * (car_centery + CAR_Y0);
-	struct_car.y1 = MULTIPLE * (car_centery + CAR_Y1);
-
-	struct_sword_up.x0 = MULTIPLE * (sword_centerx + SWORD_UP_X0);
-	struct_sword_up.x1 = MULTIPLE * (sword_centerx + SWORD_UP_X1);
-	struct_sword_up.y0 = MULTIPLE * (sword_centery + SWORD_UP_Y0);
-	struct_sword_up.y1 = MULTIPLE * (sword_centery + SWORD_UP_Y1);
-
-	struct_sword_down.x0 = MULTIPLE * (sword_centerx + SWORD_DOWN_X0);
-	struct_sword_down.x1 = MULTIPLE * (sword_centerx + SWORD_DOWN_X1);
-	struct_sword_down.y0 = MULTIPLE * (sword_centery + SWORD_DOWN_Y0);
-	struct_sword_down.y1 = MULTIPLE * (sword_centery + SWORD_DOWN_Y1);
-
-	
-	struct_fox_up.x0 = MULTIPLE*(fox_centerx + FOX_UP_X0);
-	struct_fox_up.x1 = MULTIPLE*(fox_centerx + FOX_UP_X1);
-	struct_fox_up.y0 = MULTIPLE*(fox_centery + FOX_UP_Y0);
-	struct_fox_up.y1 = MULTIPLE*(fox_centery + FOX_UP_Y1);
-
-	struct_fox_mid.x0 = MULTIPLE*(fox_centerx + FOX_MID_X0);
-	struct_fox_mid.x1 = MULTIPLE*(fox_centerx + FOX_MID_X1);
-	struct_fox_mid.y0 = MULTIPLE*(fox_centery + FOX_MID_Y0);
-	struct_fox_mid.y1 = MULTIPLE*(fox_centery + FOX_MID_Y1);
-
-	struct_fox_down.x0 = MULTIPLE*(fox_centerx + FOX_DOWN_X0);
-	struct_fox_down.x1 = MULTIPLE*(fox_centerx + FOX_DOWN_X1);
-	struct_fox_down.y0 = MULTIPLE*(fox_centery + FOX_DOWN_Y0);
-	struct_fox_down.y1 = MULTIPLE*(fox_centery + FOX_DOWN_Y1);
-	
-}
-
-
-
-
-///////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////
 GLfloat axes[4][2];
 GLfloat axes_color[3] = { 0.0f, 0.0f, 0.0f };
 GLuint VBO_axes, VAO_axes;
@@ -1577,33 +1158,35 @@ void display(void) {
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 	draw_axes();
 
+	//ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-500.0f, 0.0f, 0.0f));
 	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(airplane_centerx, airplane_centery, 0.0f));
-	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(MULTIPLE, MULTIPLE, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 	draw_airplane();
 
+	//ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-100.0f, 0.0f, 0.0f));
 	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(house_centerx, house_centery, 0.0f));
-	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(MULTIPLE, MULTIPLE, 1.0f));
+	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 	draw_house();
 
+	//ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(100.0f, 0.0f, 0.0f));
 	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(car_centerx, car_centery, 0.0f));
-	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(MULTIPLE, MULTIPLE, 1.0f));
+	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 	draw_car();
 
 	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(sword_centerx, sword_centery, 0.0f));
-	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(MULTIPLE, MULTIPLE, 1.0f));
+	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 	draw_sword();
 
 	//////////////////DRAW_FOX BELOW//////////////////////////
 	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(fox_centerx, fox_centery, 0.0f));
-	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(MULTIPLE, MULTIPLE, 1.0f));
+	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
 	ModelMatrix = glm::rotate(ModelMatrix, rotate_angle, glm::vec3(0.0f, 0.0f, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
@@ -1611,7 +1194,7 @@ void display(void) {
 
 	if(fox_crash){
 	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(fox_centerx, fox_centery, 0.0f));
-		ModelMatrix = glm::scale(ModelMatrix, glm::vec3(MULTIPLE, MULTIPLE, 1.0f));
+		ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
 		ModelMatrix = glm::rotate(ModelMatrix, rotate_angle, glm::vec3(0.0f, 0.0f, 1.0f));
 		ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 		glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
@@ -1619,7 +1202,7 @@ void display(void) {
 	}
 	else{
 		ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(fox_centerx, fox_centery, 0.0f));
-		ModelMatrix = glm::scale(ModelMatrix, glm::vec3(MULTIPLE, MULTIPLE, 1.0f));
+		ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
 		ModelMatrix = glm::rotate(ModelMatrix, rotate_angle, glm::vec3(0.0f, 0.0f, 1.0f));
 		ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 		glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
@@ -1627,7 +1210,7 @@ void display(void) {
 	}
 
 	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(fox_centerx, fox_centery, 0.0f));
-	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(MULTIPLE, MULTIPLE, 1.0f));
+	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
 	ModelMatrix = glm::rotate(ModelMatrix, rotate_angle, glm::vec3(0.0f, 0.0f, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
@@ -1635,7 +1218,7 @@ void display(void) {
 
 	if(!fox_crash){
 		ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(fox_centerx, fox_centery, 0.0f));
-		ModelMatrix = glm::scale(ModelMatrix, glm::vec3(MULTIPLE, MULTIPLE, 1.0f));
+		ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
 		ModelMatrix = glm::rotate(ModelMatrix, rotate_angle, glm::vec3(0.0f, 0.0f, 1.0f));
 		ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 		glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
@@ -1643,7 +1226,7 @@ void display(void) {
 	}
 	else{
 		ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(fox_centerx, fox_centery, 0.0f));
-		ModelMatrix = glm::scale(ModelMatrix, glm::vec3(MULTIPLE, MULTIPLE, 1.0f));
+		ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
 		ModelMatrix = glm::rotate(ModelMatrix, rotate_angle, glm::vec3(0.0f, 0.0f, 1.0f));
 		ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 		glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
@@ -1652,46 +1235,12 @@ void display(void) {
 /////////////////////////finish fox//////////////////////////////////////////////////////////////////////
 	
 	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(fox_centerx, fox_centery, 0.0f));
-	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(MULTIPLE, MULTIPLE, 1.0f));
+	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
 	ModelMatrix = glm::rotate(ModelMatrix, rotate_angle, glm::vec3(0.0f, 0.0f, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 	draw_hat();
 
-/////////////////////// start collider ////////////////////////////////
-	// collider draw part
-	/*
-	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(airplane_centerx, airplane_centery, 0.0f));
-	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(MULTIPLE, MULTIPLE, 1.0f));
-	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
-	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
-	draw_airplane_collider();
-
-	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(house_centerx, house_centery, 0.0f));
-	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(MULTIPLE, MULTIPLE, 1.0f));
-	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
-	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
-	draw_house_collider();
-
-	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(car_centerx, car_centery, 0.0f));
-	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(MULTIPLE, MULTIPLE, 1.0f));
-	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
-	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
-	draw_car_collider();
-
-	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(sword_centerx, sword_centery, 0.0f));
-	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(MULTIPLE, MULTIPLE, 1.0f));
-	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
-	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
-	draw_sword_collider();
-	
-	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(fox_centerx, fox_centery, 0.0f));
-	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(MULTIPLE, MULTIPLE, 1.0f));
-	ModelMatrix = glm::rotate(ModelMatrix, rotate_angle, glm::vec3(0.0f, 0.0f, 1.0f));
-	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
-	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
-	draw_fox_collider();
-	*/
 	glFlush();
 }
 
@@ -1701,15 +1250,6 @@ void keyboard(unsigned char key, int x, int y) {
 
 	case 27: // ESC key
 		glutLeaveMainLoop(); // Incur destuction callback for cleanups.
-		break;
-	case 117: // lower case 'u' -> increase time interval
-		time_interval++;
-		printf("time_interval : %d\n", time_interval);
-		break;
-	case 100: // lower case 'd' -> decrease time interval(time_interval이 1아래로 내려가지 않도록 조정)
-		printf("time_interval : %d\n", time_interval);
-		time_interval--;
-		if(time_interval==0) time_interval = 1;
 		break;
 	}
 }
@@ -1739,7 +1279,6 @@ void cleanup(void) {
 void timer(int value) {
 #define SENSITIVITY 5.0
 #define PERIOD 20
-	update_collider();
 	static unsigned int total_time = 0;	// 프로그램 시작 후부터 timer 실행시마다 1씩 카운트 됨.
 	if(total_time%PERIOD==0|| total_time % PERIOD == 1 || total_time % PERIOD == 2 || total_time % PERIOD == 3){
 			rotate_angle = rotate_angle + 90.0f*TO_RADIAN;
@@ -1758,12 +1297,8 @@ void timer(int value) {
 	modify_direction(&car_deltax, &car_deltay, CAR);
 	modify_direction(&sword_deltax, &sword_deltay, SWORD);
 
-	fox_crash = check_crash(struct_airplane_up, struct_fox_up) || check_crash(struct_airplane_up, struct_fox_mid) || check_crash(struct_airplane_up, struct_fox_down) ||
-				check_crash(struct_airplane_down, struct_fox_up) || check_crash(struct_airplane_down, struct_fox_mid) || check_crash(struct_airplane_down, struct_fox_down) ||
-				check_crash(struct_house, struct_fox_up) ||	check_crash(struct_house, struct_fox_mid) || check_crash(struct_house, struct_fox_down) ||
-				check_crash(struct_car, struct_fox_up) || check_crash(struct_car, struct_fox_mid) || check_crash(struct_car, struct_fox_down) ||
-				check_crash(struct_sword_up, struct_fox_up) || 	check_crash(struct_sword_up, struct_fox_mid) ||	check_crash(struct_sword_up, struct_fox_down) ||
-				check_crash(struct_sword_down, struct_fox_up) || check_crash(struct_sword_down, struct_fox_mid) ||	check_crash(struct_sword_down, struct_fox_down);
+	// 여우와 물체의 충돌 체크
+	check_fox_crash(&fox_crash);
 
 	// 키보드 방향키 입력 받아서 방향 변경
 	switch(set_key){ 
@@ -1773,25 +1308,25 @@ void timer(int value) {
 	case 1:	// right
 		fox_centerx += SENSITIVITY;
 		break;
-	case 2:	// up
-		fox_centery += SENSITIVITY;
-		break;
-	case 3:	// down
+	case 2:	// down
 		fox_centery -= SENSITIVITY;
 		break;
+	case 3:	// up
+		fox_centery += SENSITIVITY;
+		break;
 	}
-	// 윈도우에 닿으면 여우의 방향 자동 변경
-	if(fox_centerx<-win_width/2.0f+MULTIPLE * 28.0f)	// left (여우의 팔 가장 왼쪽이 -28.0f)
-		set_key=1; // 1 for right
-	else if(fox_centerx>win_width/2.0f- MULTIPLE *28.0f) // right (여우의 팔 가장 오른쪽이 +28.0f)
-		set_key=0; // 0 for left
-	else if(fox_centery<-win_height/2.0f+ MULTIPLE *32.0f) // down  (여우의 신발 가장 아래가 -32.0f)
-		set_key=2; // 2 for up
-	else if(fox_centery>win_height/2.0f- MULTIPLE *56.0f) // up (여우의 모자 leaf 가장 위가 +56.0f)
-		set_key=3; // 3 for down
+	// 윈도우에 닿으면 방향 자동 변경
+	if(fox_centerx<-win_width/2.0f+2 * 28.0f)	// left (여우의 팔 가장 왼쪽이 -28.0f)
+		set_key=1;
+	else if(fox_centerx>win_width/2.0f-2*28.0f) // right (여우의 팔 가장 오른쪽이 +28.0f)
+		set_key=0;
+	else if(fox_centery<-win_height/2.0f+2*32.0f) // down  (여우의 신발 가장 아래가 -32.0f)
+		set_key=3;
+	else if(fox_centery>win_height/2.0f-2*56.0f) // up (여우의 모자 leaf 가장 위가 +56.0f)
+		set_key=2;
 
 	glutPostRedisplay();
-	glutTimerFunc(time_interval, timer, value);
+	glutTimerFunc(100, timer, value);
 }
 
 void special(int key, int x, int y) {
@@ -1807,11 +1342,11 @@ void special(int key, int x, int y) {
 		//rotate_angle -= 90.0f*TO_RADIAN;
 		glutPostRedisplay();
 		break;
-	case GLUT_KEY_UP:
+	case GLUT_KEY_DOWN:
 		set_key = 2;
 		glutPostRedisplay();
 		break;
-	case GLUT_KEY_DOWN:
+	case GLUT_KEY_UP:
 		set_key = 3;
 		glutPostRedisplay();
 		break;
@@ -1845,6 +1380,7 @@ void initialize_OpenGL(void) {
 	glEnable(GL_MULTISAMPLE);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+	//glClearColor(255 / 255.0f, 255 / 255.0f, 177 / 255.0f, 1.0f);
 	glClearColor(80 / 255.0f, 230 / 255.0f, 250 / 255.0f, 1.0f);
 	ViewMatrix = glm::mat4(1.0f);
 }
@@ -1862,11 +1398,7 @@ void prepare_scene(void) {
 	prepare_fox_leg_shoes();
 	prepare_fox_faces_basic();
 	prepare_fox_faces_crash();
-	prepare_airplane_collider();
-	prepare_house_collider();
-	prepare_car_collider();
-	prepare_sword_collider();
-	prepare_fox_collider();
+
 }
 
 void initialize_renderer(void) {
@@ -1910,8 +1442,9 @@ void greetings(char *program_name, char messages[][256], int n_message_lines) {
 void main(int argc, char *argv[]) {
 	char program_name[64] = "Sogang CSE4170 2DObjects_GLSL_3.1";
 	char messages[N_MESSAGE_LINES][256] = {
-		"    - Keys used: 'ESC' \n    - Keys used: 'u' for increasing timer interval\n    - Keys used: 'd' for decreasing timer interval\n"
+		"    - Keys used: 'ESC' "
 	};
+
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_MULTISAMPLE);
 	glutInitWindowSize(1200, 300);
