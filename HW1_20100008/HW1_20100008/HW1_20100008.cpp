@@ -74,10 +74,11 @@ int time_interval = 100;
 GLfloat airplane_angle = 0.0f;
 GLfloat house_angle = 0.0f;
 GLfloat car_angle = 0.0f;
-GLfloat sword_angle = 0.0f;
-
+GLfloat sword_angle = -90.0f;
+GLfloat sword_angle_movement = 10.0f;
 GLfloat car_movement = -20.0f;
-
+GLfloat sword_scale = 2.0f;
+GLfloat sword_scale_movement = 0.1f;
 unsigned int rotate_car_end = 2;
 #define CAR_LEFT_END 0
 #define CAR_RIGHT_END 1
@@ -87,7 +88,10 @@ unsigned int rotate_car_end = 2;
 ///////////////////////////////////////////////////////////////////////////////////////
 GLfloat setting_deltax(unsigned int object);
 GLfloat setting_deltay(unsigned int object);
-#define TEST_CAR
+//#define TEST_CAR
+//#define TEST_HOUSE
+#define TEST_SWORD
+//#define TEST_FOX
 #define TWICE
 #ifdef TWICE
 	#define MULTIPLE 2.0
@@ -168,12 +172,10 @@ void modify_direction(GLfloat *deltax, GLfloat *deltay, unsigned int object){  /
 		if (check_direction(car_centerx, car_centery, CAR) == TOUCH_UP){
 			car_centery = win_height / 2.0f - MULTIPLE * arr_endpoint[CAR][2];	// upper bound로 car_centery를 조정해주지 않으면 car_movement값을 빼줘도 계속 check_direction()결과값이 TOUCH_UP이 나올 수 있음)
 			car_movement = -car_movement;  // 이 자리에 써야지 CASE문 내에 쓰면, check_direction함수에서 LEFT,RIGHT부터 처리하기 때문에 UP,DOWN 판단 못함.
-			printf("car_movement : %f\n", car_movement);
 		}
 		else if(check_direction(car_centerx, car_centery, CAR) == TOUCH_DOWN){
 			car_centery = -win_height / 2.0f - MULTIPLE * arr_endpoint[CAR][3];
 			car_movement = -car_movement;  // 이 자리에 써야지 CASE문 내에 쓰면, check_direction함수에서 LEFT,RIGHT부터 처리하기 때문에 UP,DOWN 판단 못함.
-			printf("car_movement : %f\n", car_movement);
 		}
 		switch(touch_place){          // ↗
 		case TOUCH_RIGHT:
@@ -1647,7 +1649,16 @@ void display(void) {
 #endif
 
 	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(sword_centerx, sword_centery, 0.0f));
-	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(MULTIPLE, MULTIPLE, 1.0f));
+	printf("sword_angle = %f\n", sword_angle);
+	sword_angle += sword_angle_movement;
+	if(sword_angle<-150.0f || sword_angle>-30.0f){
+		sword_angle_movement = -sword_angle_movement;
+		sword_angle += sword_angle_movement;
+	}
+	ModelMatrix = glm::rotate(ModelMatrix, sword_angle*TO_RADIAN, glm::vec3(0.0f, 0.0f, 1.0f));
+	sword_scale += sword_scale_movement;
+	if(sword_scale < 2.0f || sword_scale > 4.0f) sword_scale_movement = -sword_scale_movement;
+	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(sword_scale, sword_scale, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 #ifdef TEST_SWORD
@@ -1660,15 +1671,18 @@ void display(void) {
 	ModelMatrix = glm::rotate(ModelMatrix, rotate_angle, glm::vec3(0.0f, 0.0f, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
+#ifdef TEST_FOX
 	draw_fox_fixed();
-
+#endif
 	if(fox_crash){
 	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(fox_centerx, fox_centery, 0.0f));
 		ModelMatrix = glm::scale(ModelMatrix, glm::vec3(MULTIPLE, MULTIPLE, 1.0f));
 		ModelMatrix = glm::rotate(ModelMatrix, rotate_angle, glm::vec3(0.0f, 0.0f, 1.0f));
 		ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 		glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
+#ifdef TEST_FOX
 		draw_fox_arm_1();
+#endif
 	}
 	else{
 		ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(fox_centerx, fox_centery, 0.0f));
@@ -1676,7 +1690,9 @@ void display(void) {
 		ModelMatrix = glm::rotate(ModelMatrix, rotate_angle, glm::vec3(0.0f, 0.0f, 1.0f));
 		ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 		glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
+#ifdef TEST_FOX
 		draw_fox_arm_2();
+#endif
 	}
 
 	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(fox_centerx, fox_centery, 0.0f));
@@ -1684,7 +1700,9 @@ void display(void) {
 	ModelMatrix = glm::rotate(ModelMatrix, rotate_angle, glm::vec3(0.0f, 0.0f, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
+#ifdef TEST_FOX
 	draw_fox_leg_shoes();
+#endif
 
 	if(!fox_crash){
 		ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(fox_centerx, fox_centery, 0.0f));
@@ -1692,7 +1710,9 @@ void display(void) {
 		ModelMatrix = glm::rotate(ModelMatrix, rotate_angle, glm::vec3(0.0f, 0.0f, 1.0f));
 		ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 		glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
+#ifdef TEST_FOX
 		draw_fox_faces_basic();
+#endif
 	}
 	else{
 		ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(fox_centerx, fox_centery, 0.0f));
@@ -1700,7 +1720,9 @@ void display(void) {
 		ModelMatrix = glm::rotate(ModelMatrix, rotate_angle, glm::vec3(0.0f, 0.0f, 1.0f));
 		ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 		glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
+#ifdef TEST_FOX
 		draw_fox_faces_crash();
+#endif
 	}
 /////////////////////////finish fox//////////////////////////////////////////////////////////////////////
 	
@@ -1712,7 +1734,9 @@ void display(void) {
 	ModelMatrix = glm::rotate(ModelMatrix, rotate_angle, glm::vec3(0.0f, 0.0f, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
+#ifdef TEST_FOX
 	draw_hat();
+#endif
 
 /////////////////////// start collider ////////////////////////////////
 	// collider draw part
@@ -1970,8 +1994,8 @@ void main(int argc, char *argv[]) {
 	};
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_MULTISAMPLE);
-	//glutInitWindowSize(1200, 300);
-	glutInitWindowSize(200, 100);
+	glutInitWindowSize(1200, 300);
+	//glutInitWindowSize(200, 100);
 	glutInitContextVersion(4, 0);
 	glutInitContextProfile(GLUT_CORE_PROFILE);
 	glutCreateWindow(program_name);
