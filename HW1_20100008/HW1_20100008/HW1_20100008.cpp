@@ -48,9 +48,9 @@ unsigned int set_key = 0;	// 0 for left, 1 for right, 2 for down, 3 for up
 
 // 물체의 deltax, deltay 값
 GLfloat airplane_deltax = 0.0, airplane_deltay = 0.0;
-GLfloat house_deltax = -10.0, house_deltay = 10.0;
+GLfloat house_deltax = -10.0, house_deltay = 14.6;
 GLfloat car_deltax = 20.0, car_deltay = 0.0;
-GLfloat sword_deltax = 7.0, sword_deltay = 3.0;
+GLfloat sword_deltax = 13.5, sword_deltay = 7.0;
 
 // collider에 사용할 구조체
 struct collider_rect {
