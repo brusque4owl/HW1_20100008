@@ -1566,11 +1566,17 @@ void display(void) {
 	draw_airplane();
 	*/
 	static GLfloat airplane_angle = 0.0f;
-	GLfloat airplane_radius = 100.0f;
+	GLfloat airplane_radius = 200.0f;
 	airplane_angle += 10.0f;
-	//printf("angle = %f\tcos(angle) = %f\tsin(angle) = %f\n", airplane_angle, cos(airplane_angle), sin(airplane_angle));
-	//ModelMatrix = glm::rotate(glm::mat4(1.0f), angle*TO_RADIAN, glm::vec3(0.0f, 0.0f, 1.0f));
-	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(airplane_radius*cos(airplane_angle*TO_RADIAN), airplane_radius*sin(airplane_angle*TO_RADIAN), 0.0f));
+	if(airplane_angle>=720.0f) airplane_angle = 0.0f;
+	// radius를 반으로 줄여서 원 궤도를 그린 뒤, 원의 중점을 radius의 절반만큼 움직인다. 180~540도에서는 +r/2만큼 움직인 원을 통째로 y축대칭한다.(따라서 y축 대칭 후, -r/2만큼 이동해준다.)
+	if(airplane_angle>180.0f && airplane_angle<540.0f){
+		ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-airplane_radius/2, 0.0f, 0.0f));
+		ModelMatrix = glm::scale(ModelMatrix, glm::vec3(-1.0f, 1.0f, 1.0f));
+	}
+	else
+		ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(airplane_radius / 2, 0.0f, 0.0f));
+	ModelMatrix = glm::translate(ModelMatrix, glm::vec3(airplane_radius/2*cos(airplane_angle*TO_RADIAN), airplane_radius/2*sin(airplane_angle*TO_RADIAN), 0.0f));
 	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(MULTIPLE, MULTIPLE, 1.0f));
 	ModelMatrix = glm::rotate(ModelMatrix, (180+ airplane_angle)*TO_RADIAN, glm::vec3(0.0f, 0.0f, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
