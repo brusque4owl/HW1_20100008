@@ -26,8 +26,8 @@ glm::mat4 ViewMatrix, ProjectionMatrix, ViewProjectionMatrix;
 #define BLOW_OFF_HAT 10.0f
 #define TOUCH_LEFT 0
 #define TOUCH_RIGHT 1
-#define TOUCH_DOWN 2
-#define TOUCH_UP 3
+#define TOUCH_UP 2
+#define TOUCH_DOWN 3
 #define TOUCH_NOTHING 4
 
 //number of objects 0:airplane / 1:house / 2:car / 3:sword
@@ -49,7 +49,7 @@ unsigned int set_key = 0;	// 0 for left, 1 for right, 2 for down, 3 for up
 // 물체의 deltax, deltay 값
 GLfloat airplane_deltax = 0.0, airplane_deltay = 0.0;
 GLfloat house_deltax = -10.0, house_deltay = 10.0;
-GLfloat car_deltax = 16.0, car_deltay = 7.0;
+GLfloat car_deltax = 20.0, car_deltay = 0.0;
 GLfloat sword_deltax = 7.0, sword_deltay = 3.0;
 
 // collider에 사용할 구조체
@@ -76,12 +76,18 @@ GLfloat house_angle = 0.0f;
 GLfloat car_angle = 0.0f;
 GLfloat sword_angle = 0.0f;
 
+GLfloat car_movement = -20.0f;
+
+unsigned int rotate_car_end = 2;
+#define CAR_LEFT_END 0
+#define CAR_RIGHT_END 1
+#define CAR_NOTHING_END 2
 ///////////////////////////////////////////////////////////////////////////////////////
 ///////////////////       functions for objects			///////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
 GLfloat setting_deltax(unsigned int object);
 GLfloat setting_deltay(unsigned int object);
-#define TEST_HOUSE
+#define TEST_CAR
 #define TWICE
 #ifdef TWICE
 	#define MULTIPLE 2.0
@@ -96,10 +102,10 @@ bool check_crash(struct collider_rect object1, struct collider_rect object2){
 	else return false;
 }
 
-GLfloat arr_endpoint[4][4]= {	{-20.0,20.0,25.0,-25.0},	// [object number][x0,x1,y0,y1]
-								{-12.0,12.0,14.0,-14.0},
-								{-16.0,16.0,10.0,-12.0 },
-								{-6.0,6.0,19.46,-8.0}
+GLfloat arr_endpoint[4][4]= {	{-20.0,20.0,25.0,-25.0},	// AIRPLANE	[object number][x0,x1,y0,y1]
+								{-12.0,12.0,14.0,-14.0},	// HOUSE
+								{-16.0,16.0,10.0,-12.0 },	// CAR
+								{-6.0,6.0,19.46,-8.0}		// SWORD
 							};
 
 
@@ -158,9 +164,24 @@ void modify_direction(GLfloat *deltax, GLfloat *deltay, unsigned int object){  /
 	if(touch_place==TOUCH_NOTHING) return;
 
 	// 델타값 변화를 통한 방향 변화
-	if(*deltax>0.0f && *deltay>0.0f){
+	if(*deltax>=0.0f && *deltay>=0.0f){
+		if (check_direction(car_centerx, car_centery, CAR) == TOUCH_UP){
+			car_centery = win_height / 2.0f - MULTIPLE * arr_endpoint[CAR][2];	// upper bound로 car_centery를 조정해주지 않으면 car_movement값을 빼줘도 계속 check_direction()결과값이 TOUCH_UP이 나올 수 있음)
+			car_movement = -car_movement;  // 이 자리에 써야지 CASE문 내에 쓰면, check_direction함수에서 LEFT,RIGHT부터 처리하기 때문에 UP,DOWN 판단 못함.
+			printf("car_movement : %f\n", car_movement);
+		}
+		else if(check_direction(car_centerx, car_centery, CAR) == TOUCH_DOWN){
+			car_centery = -win_height / 2.0f - MULTIPLE * arr_endpoint[CAR][3];
+			car_movement = -car_movement;  // 이 자리에 써야지 CASE문 내에 쓰면, check_direction함수에서 LEFT,RIGHT부터 처리하기 때문에 UP,DOWN 판단 못함.
+			printf("car_movement : %f\n", car_movement);
+		}
 		switch(touch_place){          // ↗
 		case TOUCH_RIGHT:
+			if (object == CAR) {
+				// 90도 회전(+방향으로 90도)
+				rotate_car_end = CAR_RIGHT_END;
+				car_centery -= car_movement; // y축으로 이동
+			}
 			*deltax = -setting_deltax(object);
 			break;
 		case TOUCH_UP:
@@ -168,7 +189,7 @@ void modify_direction(GLfloat *deltax, GLfloat *deltay, unsigned int object){  /
 			break;
 		}
 	}
-	else if (*deltax>0.0f && *deltay<0.0f) { //↘
+	else if (*deltax>=0.0f && *deltay<0.0f) { //↘
 		switch (touch_place) {
 		case TOUCH_RIGHT:
 			*deltax = -setting_deltax(object);
@@ -178,9 +199,14 @@ void modify_direction(GLfloat *deltax, GLfloat *deltay, unsigned int object){  /
 			break;
 		}
 	}
-	else if (*deltax<0.0f && *deltay>0.0f) { // ↖
+	else if (*deltax<0.0f && *deltay>=0.0f) { // ↖
 		switch (touch_place) {
 		case TOUCH_LEFT:
+			if (object == CAR){
+				// 90도 회전(-방향으로 90도)
+				rotate_car_end = CAR_LEFT_END;
+				car_centery -= car_movement; // y축으로 이동
+			}
 			*deltax = -setting_deltax(object);
 			break;
 		case TOUCH_UP:
@@ -1603,8 +1629,16 @@ void display(void) {
 #ifdef TEST_HOUSE
 	draw_house();
 #endif
-
+	
 	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(car_centerx, car_centery, 0.0f));
+	if (rotate_car_end == CAR_LEFT_END){// -90도 회전
+		ModelMatrix = glm::rotate(ModelMatrix, -90.0f*TO_RADIAN, glm::vec3(0.0f, 0.0f, 1.0f));
+		rotate_car_end = CAR_NOTHING_END;
+	}
+	else if (rotate_car_end == CAR_RIGHT_END){// +90도 회전
+		ModelMatrix = glm::rotate(ModelMatrix, 90.0f*TO_RADIAN, glm::vec3(0.0f, 0.0f, 1.0f));
+		rotate_car_end = CAR_NOTHING_END;
+	}
 	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(MULTIPLE, MULTIPLE, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
@@ -1936,7 +1970,8 @@ void main(int argc, char *argv[]) {
 	};
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_MULTISAMPLE);
-	glutInitWindowSize(1200, 300);
+	//glutInitWindowSize(1200, 300);
+	glutInitWindowSize(200, 100);
 	glutInitContextVersion(4, 0);
 	glutInitContextProfile(GLUT_CORE_PROFILE);
 	glutCreateWindow(program_name);
