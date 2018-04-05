@@ -88,10 +88,12 @@ unsigned int rotate_car_end = 2;
 ///////////////////////////////////////////////////////////////////////////////////////
 GLfloat setting_deltax(unsigned int object);
 GLfloat setting_deltay(unsigned int object);
-//#define TEST_CAR
-//#define TEST_HOUSE
+#define TEST_AIRPLANE
+#define TEST_CAR
+#define TEST_HOUSE
 #define TEST_SWORD
-//#define TEST_FOX
+#define TEST_FOX
+
 #define TWICE
 #ifdef TWICE
 	#define MULTIPLE 2.0
@@ -1588,18 +1590,6 @@ void display(void) {
 
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	ModelMatrix = glm::mat4(1.0f);
-	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
-	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
-	draw_axes();
-
-	/*
-	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(airplane_centerx, airplane_centery, 0.0f));
-	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(MULTIPLE, MULTIPLE, 1.0f));
-	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
-	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
-	draw_airplane();
-	*/
 	//static GLfloat airplane_angle = 0.0f;
 	GLfloat airplane_radius = 200.0f;
 	airplane_angle += 10.0f;
@@ -1649,7 +1639,6 @@ void display(void) {
 #endif
 
 	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(sword_centerx, sword_centery, 0.0f));
-	printf("sword_angle = %f\n", sword_angle);
 	sword_angle += sword_angle_movement;
 	if(sword_angle<-150.0f || sword_angle>-30.0f){
 		sword_angle_movement = -sword_angle_movement;
@@ -1738,40 +1727,6 @@ void display(void) {
 	draw_hat();
 #endif
 
-/////////////////////// start collider ////////////////////////////////
-	// collider draw part
-	/*
-	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(airplane_centerx, airplane_centery, 0.0f));
-	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(MULTIPLE, MULTIPLE, 1.0f));
-	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
-	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
-	draw_airplane_collider();
-
-	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(house_centerx, house_centery, 0.0f));
-	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(MULTIPLE, MULTIPLE, 1.0f));
-	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
-	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
-	draw_house_collider();
-
-	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(car_centerx, car_centery, 0.0f));
-	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(MULTIPLE, MULTIPLE, 1.0f));
-	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
-	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
-	draw_car_collider();
-
-	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(sword_centerx, sword_centery, 0.0f));
-	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(MULTIPLE, MULTIPLE, 1.0f));
-	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
-	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
-	draw_sword_collider();
-	
-	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(fox_centerx, fox_centery, 0.0f));
-	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(MULTIPLE, MULTIPLE, 1.0f));
-	ModelMatrix = glm::rotate(ModelMatrix, rotate_angle, glm::vec3(0.0f, 0.0f, 1.0f));
-	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
-	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
-	draw_fox_collider();
-	*/
 	glFlush();
 }
 
@@ -1838,6 +1793,7 @@ void timer(int value) {
 	modify_direction(&car_deltax, &car_deltay, CAR);
 	modify_direction(&sword_deltax, &sword_deltay, SWORD);
 
+	// 여우와 물체의 충돌 체크
 	fox_crash = check_crash(struct_airplane_up, struct_fox_up) || check_crash(struct_airplane_up, struct_fox_mid) || check_crash(struct_airplane_up, struct_fox_down) ||
 				check_crash(struct_airplane_down, struct_fox_up) || check_crash(struct_airplane_down, struct_fox_mid) || check_crash(struct_airplane_down, struct_fox_down) ||
 				check_crash(struct_house, struct_fox_up) ||	check_crash(struct_house, struct_fox_mid) || check_crash(struct_house, struct_fox_down) ||
@@ -1994,8 +1950,7 @@ void main(int argc, char *argv[]) {
 	};
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_MULTISAMPLE);
-	glutInitWindowSize(1200, 300);
-	//glutInitWindowSize(200, 100);
+	glutInitWindowSize(600, 600);
 	glutInitContextVersion(4, 0);
 	glutInitContextProfile(GLUT_CORE_PROFILE);
 	glutCreateWindow(program_name);
