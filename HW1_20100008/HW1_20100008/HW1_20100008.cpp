@@ -69,12 +69,19 @@ struct collider_tri {
 int win_width = 0, win_height = 0;
 float centerx = 0.0f, centery = 0.0f, rotate_angle = 0.0f;
 int time_interval = 100;
+
+//rotation angle
+GLfloat airplane_angle = 0.0f;
+GLfloat house_angle = 0.0f;
+GLfloat car_angle = 0.0f;
+GLfloat sword_angle = 0.0f;
+
 ///////////////////////////////////////////////////////////////////////////////////////
 ///////////////////       functions for objects			///////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
 GLfloat setting_deltax(unsigned int object);
 GLfloat setting_deltay(unsigned int object);
-//#define NOT_TEST
+#define TEST_HOUSE
 #define TWICE
 #ifdef TWICE
 	#define MULTIPLE 2.0
@@ -231,10 +238,10 @@ void move_object(GLfloat deltax, GLfloat deltay, unsigned int object){
 
 GLfloat airplane_collider_up[4][2] = { { -20.0, 25.0 },{ -20.0, 3.0 },{ 20.0, 3.0 },{ 20.0, 25.0 } };
 GLfloat airplane_collider_down[4][2] = { { -12.0, 3.0 },{ -12.0, -25.0 },{ 12.0, -25.0 },{ 12.0, 3.0 } };
-struct collider_rect struct_airplane_up = { airplane_centerx + AIRPLANE_UP_X0,airplane_centerx + AIRPLANE_UP_X1,
-airplane_centery + AIRPLANE_UP_Y0,airplane_centery + AIRPLANE_UP_Y1 };
-struct collider_rect struct_airplane_down = { airplane_centerx + AIRPLANE_DOWN_X0,airplane_centerx + AIRPLANE_DOWN_X1,
-airplane_centery + AIRPLANE_DOWN_Y0,airplane_centery + AIRPLANE_DOWN_Y1 };
+struct collider_rect struct_airplane_up = { airplane_centerx + AIRPLANE_UP_X0 * cos(airplane_angle*TO_RADIAN),airplane_centerx + AIRPLANE_UP_X1 * cos(airplane_angle*TO_RADIAN),
+	airplane_centery + AIRPLANE_UP_Y0 * sin(airplane_angle*TO_RADIAN),airplane_centery + AIRPLANE_UP_Y1 * sin(airplane_angle*TO_RADIAN) };
+struct collider_rect struct_airplane_down = { airplane_centerx + AIRPLANE_DOWN_X0 * cos(airplane_angle*TO_RADIAN),airplane_centerx + AIRPLANE_DOWN_X1 * cos(airplane_angle*TO_RADIAN),
+	airplane_centery + AIRPLANE_DOWN_Y0 * sin(airplane_angle*TO_RADIAN),airplane_centery + AIRPLANE_DOWN_Y1 * sin(airplane_angle*TO_RADIAN) };
 
 GLfloat airplane_collider_color[2][3] = {
 	{ 0 / 255.0f, 0 / 255.0f, 0 / 255.0f },
@@ -1565,10 +1572,12 @@ void display(void) {
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 	draw_airplane();
 	*/
-	static GLfloat airplane_angle = 0.0f;
+	//static GLfloat airplane_angle = 0.0f;
 	GLfloat airplane_radius = 200.0f;
 	airplane_angle += 10.0f;
 	if(airplane_angle>=720.0f) airplane_angle = 0.0f;
+	airplane_centerx = airplane_radius / 2 * cos(airplane_angle*TO_RADIAN);
+	airplane_centery = airplane_radius / 2 * sin(airplane_angle*TO_RADIAN);
 	// radius를 반으로 줄여서 원 궤도를 그린 뒤, 원의 중점을 radius의 절반만큼 움직인다. 180~540도에서는 +r/2만큼 움직인 원을 통째로 y축대칭한다.(따라서 y축 대칭 후, -r/2만큼 이동해준다.)
 	if(airplane_angle>180.0f && airplane_angle<540.0f){
 		ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-airplane_radius/2, 0.0f, 0.0f));
@@ -1581,13 +1590,17 @@ void display(void) {
 	ModelMatrix = glm::rotate(ModelMatrix, (180+ airplane_angle)*TO_RADIAN, glm::vec3(0.0f, 0.0f, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
+#ifdef TEST_AIRPLANE
 	draw_airplane();
+#endif
 
+	house_angle += 30.0f;
 	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(house_centerx, house_centery, 0.0f));
 	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(MULTIPLE, MULTIPLE, 1.0f));
+	ModelMatrix = glm::rotate(ModelMatrix, (house_angle)*TO_RADIAN, glm::vec3(0.0f, 0.0f, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
-#if NOT_TEST
+#ifdef TEST_HOUSE
 	draw_house();
 #endif
 
@@ -1595,7 +1608,7 @@ void display(void) {
 	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(MULTIPLE, MULTIPLE, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
-#if NOT_TEST
+#ifdef TEST_CAR
 	draw_car();
 #endif
 
@@ -1603,7 +1616,7 @@ void display(void) {
 	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(MULTIPLE, MULTIPLE, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
-#if NOT_TEST
+#ifdef TEST_SWORD
 	draw_sword();
 #endif
 
