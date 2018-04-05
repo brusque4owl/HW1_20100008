@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <GL/glew.h>
 #include <GL/freeglut.h>
-#include <math.h>
 
 #include "Shaders/LoadShaders.h"
 GLuint h_ShaderProgram; // handle to shader program
@@ -47,7 +46,7 @@ bool fox_crash = 0;	// 0 for not crash, 1 for crashed; it is used in display()
 unsigned int set_key = 0;	// 0 for left, 1 for right, 2 for down, 3 for up
 
 // 물체의 deltax, deltay 값
-GLfloat airplane_deltax = 0.0, airplane_deltay = 0.0;
+GLfloat airplane_deltax = -10.0, airplane_deltay = -10.0;
 GLfloat house_deltax = -10.0, house_deltay = 10.0;
 GLfloat car_deltax = 16.0, car_deltay = 7.0;
 GLfloat sword_deltax = 7.0, sword_deltay = 3.0;
@@ -74,7 +73,6 @@ int time_interval = 100;
 ///////////////////////////////////////////////////////////////////////////////////////
 GLfloat setting_deltax(unsigned int object);
 GLfloat setting_deltay(unsigned int object);
-//#define NOT_TEST
 #define TWICE
 #ifdef TWICE
 	#define MULTIPLE 2.0
@@ -1558,48 +1556,29 @@ void display(void) {
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 	draw_axes();
 
-	/*
 	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(airplane_centerx, airplane_centery, 0.0f));
 	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(MULTIPLE, MULTIPLE, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
-	draw_airplane();
-	*/
-	static GLfloat airplane_angle = 0.0f;
-	GLfloat airplane_radius = 100.0f;
-	airplane_angle += 10.0f;
-	//printf("angle = %f\tcos(angle) = %f\tsin(angle) = %f\n", airplane_angle, cos(airplane_angle), sin(airplane_angle));
-	//ModelMatrix = glm::rotate(glm::mat4(1.0f), angle*TO_RADIAN, glm::vec3(0.0f, 0.0f, 1.0f));
-	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(airplane_radius*cos(airplane_angle*TO_RADIAN), airplane_radius*sin(airplane_angle*TO_RADIAN), 0.0f));
-	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(MULTIPLE, MULTIPLE, 1.0f));
-	ModelMatrix = glm::rotate(ModelMatrix, (180+ airplane_angle)*TO_RADIAN, glm::vec3(0.0f, 0.0f, 1.0f));
-	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
-	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
-	
 	draw_airplane();
 
 	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(house_centerx, house_centery, 0.0f));
 	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(MULTIPLE, MULTIPLE, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
-#if NOT_TEST
 	draw_house();
-#endif
+
 	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(car_centerx, car_centery, 0.0f));
 	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(MULTIPLE, MULTIPLE, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
-#if NOT_TEST
 	draw_car();
-#endif
 
 	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(sword_centerx, sword_centery, 0.0f));
 	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(MULTIPLE, MULTIPLE, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
-#if NOT_TEST
 	draw_sword();
-#endif
 
 	//////////////////DRAW_FOX BELOW//////////////////////////
 	ModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(fox_centerx, fox_centery, 0.0f));
